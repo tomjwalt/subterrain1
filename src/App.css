@@ -1,0 +1,18 @@
+* {
+  font-style: normal;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.navbar {
+ display: flex;
+ align-items: start;
+ justify-content: start;
+}
+
+.title {
+  padding: 10px;
+  cursor: pointer;
+}
+    
