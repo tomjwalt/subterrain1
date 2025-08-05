@@ -1,10 +1,12 @@
+
 * {
   font-style: normal;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-color: #070808;
 }
-
+/*
 .navbar {
  display: flex;
  align-items: start;
@@ -15,4 +17,4 @@
   padding: 10px;
   cursor: pointer;
 }
-    
+     */
