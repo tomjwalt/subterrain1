@@ -5,7 +5,7 @@ import { faCartShopping, faUser, faXmark  } from "@fortawesome/free-solid-svg-ic
 
 const LoginModal = ({ onClose }) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-50">
       <div className="bg-white rounded-2xl p-8 shadow-lg w-96 relative">
         <button
           onClick={onClose}
