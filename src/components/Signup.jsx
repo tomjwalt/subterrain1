@@ -1,56 +1,67 @@
-import React from "react";
+import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signUperror, setSignUpError } = useState("");
-  const [message, setMessage] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const handleSignup = async (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
 
-    const { data, error } = await supabase.auth.SignUp({
+    const { data: { user }, error } = await supabase.auth.signUp({
       email,
       password,
     });
+
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+
+    if (user) {
+      // Insert user into profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert([{ id: user.id, email }]);
+
+      if (profileError) {
+        setErrorMsg("Signed up but failed to create profile.");
+        console.error(profileError.message);
+      } else {
+        setSuccessMsg("Sucessfully signed up check email to authenticate account.");
+      }
+    }
   };
-  if (error) {
-    setError(error.message);
-  } else {
-    setMessage("Check your email to authenticate account");
-  }
+
   return (
-    <div>
-      <form
-        onSubmit={handleSignup}
-        className="flex flex-col gap-4 p-4 bg-gray-800 rounded-lg"
+    <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <button
+        type="submit"
+        className="bg-green-600 text-white py-2 rounded hover:bg-green-700 transition cursor-pointer"
       >
-        <h2 className="text-white text-xl font-bold">Sign Up</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          className="p-2 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="p-2 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Sign Up
-        </button>
-        {error && <p className="text-red-400">{error}</p>}
-        {message && <p className="text-green-400">{message}</p>}
-      </form>
-    </div>
+        Sign Up
+      </button>
+      {errorMsg && <p className="text-red-500">{errorMsg}</p>}
+      {successMsg && <p className="text-green-500">{successMsg}</p>}
+    </form>
   );
 };
 

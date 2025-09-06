@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -8,6 +9,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg(""); // clear before login attempt
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -15,9 +17,9 @@ const Login = () => {
     });
 
     if (error) {
-      setError(error.message);
+      setErrorMsg(error.message); // ✅ only set inside handler
     } else {
-      console.log("logged in", data);
+      console.log("Logged in:", data);
     }
   };
 
@@ -28,29 +30,26 @@ const Login = () => {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className=" text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="text-white border p-2 rounded"
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="text-white border p-2 rounded"
       />
-      <button
-        type="submit"
-        className="bg-yellow-300 text-white py-2 rounded hover:bg-yellow-300 transition cursor-pointer"
-      >
+      <button type="submit" className="bg-blue-600 text-white py-2 rounded">
         Log In
       </button>
-      <button
-        type="submit"
-        className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition cursor-pointer"
-      >
-        Sign Up
-      </button>
+
       {errorMsg && <p className="text-red-500">{errorMsg}</p>}
+
+      <Link to="/signup" className="text-blue-400 underline cursor-pointer">
+        Or Sign Up
+      </Link>
     </form>
   );
 };
+
 export default Login;
