@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
-import { Link } from "react-router-dom";
 
-const Login = () => {
+const Login = ({ onSignupRedirect }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMsg(""); // clear before login attempt
+    setErrorMsg("");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -17,7 +16,7 @@ const Login = () => {
     });
 
     if (error) {
-      setErrorMsg(error.message); // ✅ only set inside handler
+      setErrorMsg(error.message);
     } else {
       console.log("Logged in:", data);
     }
@@ -39,15 +38,23 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
         className="text-white border p-2 rounded"
       />
-      <button type="submit" className="bg-blue-600 text-white py-2 rounded">
+      <button
+        type="submit"
+        className="bg-blue-600 text-white py-2 rounded cursor-pointer"
+      >
         Log In
       </button>
 
       {errorMsg && <p className="text-red-500">{errorMsg}</p>}
 
-      <Link to="/signup" className="text-blue-400 underline cursor-pointer">
+      {/* 👇 Clicking this will close modal + navigate to /signup */}
+      <button
+        type="button"
+        onClick={onSignupRedirect}
+        className="text-blue-400 underline cursor-pointer bg-transparent"
+      >
         Or Sign Up
-      </Link>
+      </button>
     </form>
   );
 };
