@@ -18,7 +18,7 @@ const Checkout = () => {
       currency: "gbp",
       total: {
         label: "Total",
-        amount: 2499, // price in pence (e.g. £24.99)
+        amount: 2499,
       },
       requestPayerName: true,
       requestPayerEmail: true,

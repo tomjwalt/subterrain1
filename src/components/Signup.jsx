@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
+import { Link, Routes, Route } from "react-router-dom"
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -51,6 +53,13 @@ const Signup = () => {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        className="text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <input
+        type="name"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         className="text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
       <button
