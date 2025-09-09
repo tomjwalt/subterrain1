@@ -40,21 +40,24 @@ const Login = ({ onSignupRedirect }) => {
       />
       <button
         type="submit"
-        className="bg-blue-600 text-white py-2 rounded cursor-pointer"
+        className="border border-white-50 text-white py-2 rounded cursor-pointer"
       >
         Log In
       </button>
 
       {errorMsg && <p className="text-red-500">{errorMsg}</p>}
 
-      {/* 👇 Clicking this will close modal + navigate to /signup */}
-      <button
-        type="button"
-        onClick={onSignupRedirect}
-        className="text-blue-400 underline cursor-pointer bg-transparent"
-      >
-        Or Sign Up
-      </button>
+      <div className="flex ">
+        <h2 className="text-white pd-4">new customer?</h2>
+
+        <button
+          type="button"
+          onClick={onSignupRedirect}
+          className="text-blue-400 underline cursor-pointer bg-transparent"
+        >
+          Sign Up
+        </button>
+      </div>
     </form>
   );
 };
