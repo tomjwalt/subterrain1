@@ -35,7 +35,6 @@ const Signup = () => {
     }
 
     if (user) {
-      // Insert user into profiles table
       const { error: profileError } = await supabase
         .from("profiles")
         .insert([{ id: user.id, email }]);
@@ -52,33 +51,46 @@ const Signup = () => {
   };
 
   return (
-    <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+  <div className="flex items-center justify-center min-h-screen bg-black" >
+    <form onSubmit={handleSignUp} className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-gray-900 p-6 rounded-lg shadow-md">
       <input
         type="first name"
         placeholder="First Name"
         value={firstName}
         onChange={(e) => setfirstName(e.target.value)}
-        className="text-white border border-gray-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition"
       />
       <input
         type="last name"
         placeholder="Last Name"
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
-        className="text-white border border-gray-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition"
       />
       <input
         type="email"
         placeholder="Email"
-        value={email}
+        value={email} 
         onChange={(e) => setEmail(e.target.value)}
-        className="text-white border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition focus:ring-blue-400"
       />
       <div className="relative">
         <input
           id="dob"
           type="date"
-          className="dob-input border border-gray-400 p-2 rounded text-white w-full pr-10"
+          className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition"
         />
         <FontAwesomeIcon
           icon={faCalendarDays}
@@ -93,7 +105,10 @@ const Signup = () => {
           value={gender}
           id="gender"
           onChange={(e) => setGender(e.target.value)}
-          className="text-white border border-gray-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition"
         >
           <option value="" disabled>
             Select Gender
@@ -108,19 +123,26 @@ const Signup = () => {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="text-white border border-gray-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition"
       />
 
       <button
         type="submit"
-        className="border border-gray-400 bg-green-600 text-gray-300 py-2 rounded hover:text-white transition cursor-pointer"
+        className="w-full p-3 rounded-lg bg-black border border-gray-700 text-white 
+             focus:outline-none focus:ring-2 focus:ring-white hover:ring-2 hover:ring-white 
+             focus:drop-shadow-[0_0_1px_white] hover:drop-shadow-[0_0_1px_white] 
+             transition"
       >
         Sign Up
       </button>
       {errorMsg && <p className="text-red-500">{errorMsg}</p>}
       {successMsg && <p className="text-green-500">{successMsg}</p>}
     </form>
-  );
+  </div>
+   ); 
 };
 
 export default Signup;
