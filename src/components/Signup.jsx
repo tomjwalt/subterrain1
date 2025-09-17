@@ -35,22 +35,21 @@ const Signup = () => {
     }
 
     if (user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: user.id,
-            email,
-            first_name: firstName,
-            last_name: lastName,
-            dob: dateOfBirth,
-            gender,
-          },
-        ]);
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: user.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          dob: dateOfBirth,
+          gender,
+          avatar_url: "",
+        },
+      ]);
 
       if (profileError) {
-        setErrorMsg("Signed up but failed to create profile.");
-        console.error(profileError.message);
+        console.error("Profile insert error:", profileError);
+        setErrorMsg(profileError.message);
       } else {
         setSuccessMsg(
           "Sucessfully signed up check email to authenticate account."
