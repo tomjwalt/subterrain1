@@ -2,23 +2,73 @@ import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import Autocomplete from "react-google-autocomplete";
 
-// Custom address input using Google Places Autocomplete
-const AddressInput = ({ address, setAddress }) => {
+// Extract street, city, state, postal, country
+const parseAddressComponents = (components) => {
+  const result = {
+    street: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+  };
+
+  components.forEach((component) => {
+    if (component.types.includes("street_number")) {
+      result.street = component.long_name + " " + result.street;
+    }
+    if (component.types.includes("route")) {
+      result.street += component.long_name;
+    }
+    if (component.types.includes("locality")) {
+      result.city = component.long_name;
+    }
+    if (component.types.includes("administrative_area_level_1")) {
+      result.state = component.long_name;
+    }
+    if (component.types.includes("postal_code")) {
+      result.postalCode = component.long_name;
+    }
+    if (component.types.includes("country")) {
+      result.country = component.long_name;
+    }
+  });
+
+  return result;
+};
+
+const AddressInput = ({
+  address,
+  setAddress,
+  setStreet,
+  setCity,
+  setState,
+  setPostalCode,
+  setCountry,
+}) => {
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (!window.google || !inputRef.current) return;
 
     const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ["geocode"], // allows addresses
+      types: ["geocode"],
+      componentRestrictions: { country: "gb" },
     });
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
-      if (place.formatted_address) {
-        setAddress(place.formatted_address);
-      }
+      if (!place || !place.address_components) return;
+
+      const parsed = parseAddressComponents(place.address_components);
+
+      setAddress(place.formatted_address);
+      setStreet(parsed.street);
+      setCity(parsed.city);
+      setState(parsed.state);
+      setPostalCode(parsed.postalCode);
+      setCountry(parsed.country);
     });
   }, []);
 
@@ -42,7 +92,15 @@ const Signup = () => {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("");
+
+  // Address fields
   const [address, setAddress] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("");
+
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -78,7 +136,12 @@ const Signup = () => {
           last_name: lastName,
           dob: dateOfBirth || null,
           gender,
-          address,
+          address, // full formatted address
+          street,
+          city,
+          state,
+          postal_code: postalCode,
+          country,
           avatar_url: "",
         },
       ]);
@@ -160,9 +223,26 @@ const Signup = () => {
         </select>
 
         {/* Google Address Input */}
-        <AddressInput address={address} setAddress={setAddress} />
+        <AddressInput className="text-white"
+          address={address}
+          setAddress={setAddress}
+          setStreet={setStreet}
+          setCity={setCity}
+          setState={setState}
+          setPostalCode={setPostalCode}
+          setCountry={setCountry}
+        />
 
-        {/* Password */}
+        {/* Show parsed fields (optional, remove if not needed) */}
+        <div className="text-white text-sm space-y-1">
+          {street && <p>Street: {street}</p>}
+          {city && <p>City: {city}</p>}
+          {state && <p>State: {state}</p>}
+          {postalCode && <p>Postal Code: {postalCode}</p>}
+          {country && <p>Country: {country}</p>}
+        </div>
+
+        {/* Passwords */}
         <input
           type="password"
           placeholder="Password"

@@ -22,7 +22,7 @@ function App() {
 
   const handleSignupRedirect = () => {
     closeLogin();
-    navigate("/signup"); // ✅ closes modal, then navigates to signup page
+    navigate("/signup");
   };
 
   return (
