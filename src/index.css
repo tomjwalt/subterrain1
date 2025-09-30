@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* Google Places Autocomplete container */
+.pac-container {
+  background-color: #1f2937 !important; /* Tailwind gray-800 */
+  border: 1px solid #374151 !important; /* Tailwind gray-700 */
+  border-radius: 0.75rem !important; /* rounded-xl */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* soft shadow */
+  font-family: 'Inter', sans-serif !important;
+  z-index: 9999 !important; /* make sure it floats above everything */
+}
+
+/* Prediction items */
+.pac-item {
+  padding: 0.5rem 0.75rem !important; /* Tailwind p-2 px-3 */
+  color: #f9fafb !important; /* Tailwind gray-50 */
+  font-size: 0.875rem !important; /* text-sm */
+  cursor: pointer;
+}
+
+/* Divider line between items */
+.pac-item + .pac-item {
+  border-top: 1px solid #374151 !important; /* Tailwind gray-700 */
+}
+
+/* Hover & selected styles */
+.pac-item:hover,
+.pac-item-selected {
+  background-color: #374151 !important; /* Tailwind gray-700 */
+  color: #f3f4f6 !important; /* Tailwind gray-100 */
+}
+
+/* The little location icons */
+.pac-icon {
+  filter: brightness(1) invert(0); /* make them white */
+  opacity: 0.8;
+}
+
+/* "Powered by Google" logo */
+.pac-container:after {
+  display: none !important; /* hide if you don’t want branding */
+}

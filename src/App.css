@@ -6,7 +6,3 @@
   box-sizing: border-box;
   background-color: #070808;
 }
-/* 
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-} */
