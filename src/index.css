@@ -6,7 +6,8 @@
   border: 1px solid #374151 !important; /* Tailwind gray-700 */
   border-radius: 0.75rem !important; /* rounded-xl */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* soft shadow */
-  font-family: 'Inter', sans-serif !important;
+  font-family: "Inter", sans-serif !important;
+
   z-index: 9999 !important; /* make sure it floats above everything */
 }
 

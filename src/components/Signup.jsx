@@ -92,6 +92,7 @@ const Signup = () => {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("");
+  const [phoneNumber, setPhoneNumber] = ("");
 
   // Address fields
   const [address, setAddress] = useState("");
@@ -207,6 +208,14 @@ const Signup = () => {
             className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none"
           />
         </div>
+
+          <input
+          type="phoneNumber"
+          placeholder="Phone Number"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          className="input-field"
+        />
 
         {/* Gender */}
         <select
