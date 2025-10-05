@@ -7,6 +7,7 @@ import Autocomplete from "react-google-autocomplete";
 // Extract street, city, state, postal, country
 const parseAddressComponents = (components) => {
   const result = {
+    houseNumber: "", 
     street: "",
     city: "",
     state: "",
@@ -41,6 +42,7 @@ const parseAddressComponents = (components) => {
 const AddressInput = ({
   address,
   setAddress,
+  setHouseNumber,
   setStreet,
   setCity,
   setState,
@@ -67,6 +69,7 @@ const AddressInput = ({
       const parsed = parseAddressComponents(place.address_components);
 
       setAddress(place.formatted_address);
+      setHouseNumber(parsed.houseNumber);
       setStreet(parsed.street);
       setCity(parsed.city);
       setState(parsed.state);
@@ -96,6 +99,7 @@ const AddressInput = ({
               const parsed = parseAddressComponents(place.address_components);
 
               setAddress(place.formatted_address);
+              setHouseNumber(parsed.houseNumber);
               setStreet(parsed.street);
               setCity(parsed.city);
               setState(parsed.state);
@@ -153,6 +157,7 @@ const Signup = () => {
 
   // Address fields
   const [address, setAddress] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -196,6 +201,7 @@ const Signup = () => {
           gender,
           phone_number: phoneNumber,
           address, // full formatted address
+          houseNumber,
           street,
           city,
           state,
@@ -294,6 +300,7 @@ const Signup = () => {
         <AddressInput
           address={address}
           setAddress={setAddress}
+          setHouseNumber={setHouseNumber}
           setStreet={setStreet}
           setCity={setCity}
           setState={setState}
@@ -303,6 +310,7 @@ const Signup = () => {
 
         {/* Show parsed fields (optional, remove if not needed) */}
         <div className="text-white text-sm space-y-1">
+          {houseNumber && <p>House Number: {houseNumber}</p>}
           {street && <p>Street: {street}</p>}
           {city && <p>City: {city}</p>}
           {state && <p>State: {state}</p>}
