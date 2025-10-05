@@ -19,6 +19,21 @@
   cursor: pointer;
 }
 
+.pac-item-query {
+  color: #f9fafb !important; /* bright white */
+  font-weight: 500; /* make it a little bolder */
+}
+
+.pac-item span {
+  color: #d1d5db !important; /* Tailwind gray-300 */
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+}
+
 /* Divider line between items */
 .pac-item + .pac-item {
   border-top: 1px solid #374151 !important; /* Tailwind gray-700 */

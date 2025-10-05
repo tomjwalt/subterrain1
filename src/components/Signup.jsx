@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays, faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
 import Autocomplete from "react-google-autocomplete";
 
 // Extract street, city, state, postal, country
@@ -52,10 +52,13 @@ const AddressInput = ({
   useEffect(() => {
     if (!window.google || !inputRef.current) return;
 
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ["geocode"],
-      componentRestrictions: { country: "gb" },
-    });
+    const autocomplete = new window.google.maps.places.Autocomplete(
+      inputRef.current,
+      {
+        types: ["geocode"],
+        componentRestrictions: { country: "gb" },
+      }
+    );
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
@@ -69,17 +72,71 @@ const AddressInput = ({
       setState(parsed.state);
       setPostalCode(parsed.postalCode);
       setCountry(parsed.country);
+
+      inputRef.current.value = place.formatted_address;
     });
   }, []);
 
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const geocoder = new window.google.maps.Geocoder();
+
+        geocoder.geocode(
+          { location: { lat: latitude, lng: longitude } },
+          (results, status) => {
+            if (status === "OK" && results[0]) {
+              const place = results[0];
+              const parsed = parseAddressComponents(place.address_components);
+
+              setAddress(place.formatted_address);
+              setStreet(parsed.street);
+              setCity(parsed.city);
+              setState(parsed.state);
+              setPostalCode(parsed.postalCode);
+              setCountry(parsed.country);
+
+              inputRef.current.value = place.formatted_address;
+            } else {
+              console.error("geocoder failed due to: " + status)
+              alert("Unable to retrieve location " + status) ;
+            }
+          }
+        );
+      },
+      (err) => {
+        console.error("Geolocation error:", err.message);
+        alert("Location access denied or unavailable" + err.message);
+      }
+    );
+  };
+
   return (
-    <input
-      type="text"
-      ref={inputRef}
-      placeholder="Start typing your address..."
-      defaultValue={address}
-      className="input-field"
-    />
+    <div className="relative w-full">
+      <input
+        type="text"
+        ref={inputRef}
+        placeholder="Start typing your address..."
+        defaultValue={address}
+        className="input-field pr-10"
+      />
+      <button
+        type="button"
+        onClick={handleUseLocation}
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md shadow-md transition cursor-pointer"
+      >
+        <FontAwesomeIcon 
+        icon={faLocationCrosshairs}
+        className="text-white"
+        />
+      </button>
+    </div>
   );
 };
 
@@ -92,7 +149,7 @@ const Signup = () => {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("");
-  const [phoneNumber, setPhoneNumber] = ("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   // Address fields
   const [address, setAddress] = useState("");
@@ -137,6 +194,7 @@ const Signup = () => {
           last_name: lastName,
           dob: dateOfBirth || null,
           gender,
+          phone_number: phoneNumber,
           address, // full formatted address
           street,
           city,
@@ -209,8 +267,9 @@ const Signup = () => {
           />
         </div>
 
-          <input
-          type="phoneNumber"
+        {/* Phone */}
+        <input
+          type="tel"
           placeholder="Phone Number"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
@@ -232,7 +291,7 @@ const Signup = () => {
         </select>
 
         {/* Google Address Input */}
-        <AddressInput className="text-white"
+        <AddressInput
           address={address}
           setAddress={setAddress}
           setStreet={setStreet}
@@ -269,12 +328,11 @@ const Signup = () => {
 
         {/* Terms */}
         <label className="text-white flex items-center">
-          <input type="checkbox" className="mr-2" />
-          I agree to the terms and conditions
+          <input type="checkbox" className="mr-2" /> I agree to the terms and
+          conditions
         </label>
         <label className="text-white flex items-center">
-          <input type="checkbox" className="mr-2" />
-          I agree to marketing emails
+          <input type="checkbox" className="mr-2" /> I agree to marketing emails
         </label>
 
         {/* Submit */}
