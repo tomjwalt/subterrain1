@@ -54,13 +54,14 @@ const AddressInput = ({
   useEffect(() => {
     if (!window.google || !inputRef.current) return;
 
-    const autocomplete = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["geocode"],
-        componentRestrictions: { country: "gb" },
-      }
+    const autocomplete = new google.maps.places.PlaceAutocompleteElement(
+      inputRef.current
     );
+
+    autocomplete.setOptions({
+      types: ["geocode"],
+      componentRestrictions: { country: "gb" },
+  });
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
