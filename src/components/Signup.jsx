@@ -7,6 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const GETADDRESS_API_KEY = "mtWbhJyhyU6LW4ucv1SH9Q48183";
+const GOOGLE_API_KEY = "AIzaSyDBPnU6AYyPDTTwUWaMXliQ-HGJk2LqgWk";
 
 const AddressInput = ({
   address,
@@ -22,7 +23,7 @@ const AddressInput = ({
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔍 Step 1 — get list of possible addresses for the postcode
+  // Get list of addresses by postcode (GetAddress.io)
   const findAddressesByPostcode = async () => {
     if (!postcode) {
       alert("Please enter a postcode");
@@ -52,7 +53,7 @@ const AddressInput = ({
     }
   };
 
-  // 🏠 Step 2 — when user selects one address, fetch full details
+  // Select an address to fill form
   const handleSelectAddress = async (sug) => {
     setLoading(true);
     try {
@@ -86,7 +87,7 @@ const AddressInput = ({
     }
   };
 
-  // 📍 Step 3 — optional: use geolocation
+  // Use My Location (Google Maps API)
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
@@ -96,58 +97,78 @@ const AddressInput = ({
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
+
         try {
-          const res = await fetch(
-            `https://api.getAddress.io/find/${latitude},${longitude}?api-key=${GETADDRESS_API_KEY}`
+          const response = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
           );
-          const data = await res.json();
+          const data = await response.json();
 
-          if (data && data.addresses && data.addresses[0]) {
-            const addr = data.addresses[0];
-            const formatted = Object.values(addr).filter(Boolean).join(", ");
+          if (data.status === "OK" && data.results.length > 0) {
+            const result = data.results[0];
+            const components = result.address_components;
 
+            const getComponent = (type) => {
+              const comp = components.find((c) => c.types.includes(type));
+              return comp ? comp.long_name : "";
+            };
+
+            const houseNumber = getComponent("street_number");
+            const street = getComponent("route");
+            const city =
+              getComponent("postal_town") ||
+              getComponent("locality") ||
+              getComponent("administrative_area_level_2");
+            const state = getComponent("administrative_area_level_1");
+            const postalCode = getComponent("postal_code");
+            const country = getComponent("country");
+            const formatted = result.formatted_address;
+
+            setHouseNumber(houseNumber);
+            setStreet(street);
+            setCity(city);
+            setState(state);
+            setPostalCode(postalCode);
+            setCountry(country);
             setAddress(formatted);
-            setHouseNumber(addr.building_number || "");
-            setStreet(addr.thoroughfare || "");
-            setCity(addr.post_town || "");
-            setState(addr.county || "");
-            setPostalCode(addr.postcode || "");
-            setCountry("United Kingdom");
+          } else {
+            alert("Could not find address from your location.");
           }
         } catch (err) {
-          alert("Unable to retrieve location details");
-          console.error(err);
+          console.error("Error fetching location details:", err);
+          alert("Unable to retrieve location details.");
         }
       },
       (err) => {
         alert("Location access denied or unavailable");
         console.error("Geolocation error:", err.message);
-      }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
   return (
     <div className="flex flex-col gap-3 w-full relative">
-      {/* Postcode field + Find button */}
+      {/* Postcode + Find button */}
       <div className="flex gap-2 w-full">
         <input
           type="text"
           placeholder="Enter postcode"
           value={postcode}
           onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-          className="flex-grow input-field text-base px-4 py-3"
+          className="input-field text-base px-4 py-3 flex-grow"
         />
         <button
           type="button"
           onClick={findAddressesByPostcode}
           disabled={loading}
-          className="input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer flex items-center justify-center whitespace-nowrap"
+          className="input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer flex items-center justify-center whitespace-nowrap px-4 py-3"
         >
           {loading ? "Loading..." : "Find My Address"}
         </button>
       </div>
 
-      {/* Dropdown of addresses */}
+      {/* Dropdown */}
       {suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10">
           {suggestions.map((sug) => (
@@ -162,11 +183,11 @@ const AddressInput = ({
         </div>
       )}
 
-      {/* Use my location button */}
+      {/* Use My Location */}
       <button
         type="button"
         onClick={handleUseLocation}
-        className="input-field flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md cursor-pointer"
+        className="input-field flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md cursor-pointer px-4 py-3"
       >
         <FontAwesomeIcon icon={faLocationCrosshairs} className="text-white" />
         Use My Location
@@ -336,7 +357,7 @@ const Signup = () => {
           setCountry={setCountry}
         />
 
-        {/* Optional: show parsed values */}
+        {/* Parsed values (optional) */}
         <div className="text-white text-sm space-y-1">
           {houseNumber && <p>House Number: {houseNumber}</p>}
           {street && <p>Street: {street}</p>}
