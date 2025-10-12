@@ -1,46 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarDays,
   faLocationCrosshairs,
 } from "@fortawesome/free-solid-svg-icons";
-import Autocomplete from "react-google-autocomplete";
 
-// Extract street, city, state, postal, country
-const parseAddressComponents = (components) => {
-  const result = {
-    houseNumber: "",
-    street: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "",
-  };
-
-  components.forEach((component) => {
-    if (component.types.includes("street_number")) {
-      result.street = component.long_name + " " + result.street;
-    }
-    if (component.types.includes("route")) {
-      result.street += component.long_name;
-    }
-    if (component.types.includes("locality")) {
-      result.city = component.long_name;
-    }
-    if (component.types.includes("administrative_area_level_1")) {
-      result.state = component.long_name;
-    }
-    if (component.types.includes("postal_code")) {
-      result.postalCode = component.long_name;
-    }
-    if (component.types.includes("country")) {
-      result.country = component.long_name;
-    }
-  });
-
-  return result;
-};
+const GETADDRESS_API_KEY = "mtWbhJyhyU6LW4ucv1SH9Q48183";
 
 const AddressInput = ({
   address,
@@ -52,35 +18,75 @@ const AddressInput = ({
   setPostalCode,
   setCountry,
 }) => {
-  const inputRef = useRef(null);
-  const [showLocationBtn, setShowLocationBtn] = useState(false);
+  const [postcode, setPostcode] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!window.google || !inputRef.current) return;
+  // 🔍 Step 1 — get list of possible addresses for the postcode
+  const findAddressesByPostcode = async () => {
+    if (!postcode) {
+      alert("Please enter a postcode");
+      return;
+    }
 
-    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-      types: ["geocode"],
-      componentRestrictions: { country: "gb" },
-    });
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://api.getAddress.io/autocomplete/${encodeURIComponent(
+          postcode
+        )}?api-key=${GETADDRESS_API_KEY}`
+      );
+      const data = await response.json();
 
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      if (!place || !place.address_components) return;
+      if (data && data.suggestions) {
+        setSuggestions(data.suggestions);
+      } else {
+        alert("No addresses found for that postcode");
+        setSuggestions([]);
+      }
+    } catch (err) {
+      console.error("Error fetching addresses:", err);
+      alert("Failed to fetch addresses. Check API key or connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const parsed = parseAddressComponents(place.address_components);
+  // 🏠 Step 2 — when user selects one address, fetch full details
+  const handleSelectAddress = async (sug) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}`
+      );
+      const data = await response.json();
 
-      setAddress(place.formatted_address);
-      setHouseNumber(parsed.houseNumber);
-      setStreet(parsed.street);
-      setCity(parsed.city);
-      setState(parsed.state);
-      setPostalCode(parsed.postalCode);
-      setCountry(parsed.country);
+      if (data) {
+        const buildingNumber = data.building_number || "";
+        const thoroughfare = data.thoroughfare || "";
+        const town = data.post_town || "";
+        const county = data.county || "";
+        const postcode = data.postcode || "";
+        const formatted = data.formatted_address.join(", ");
 
-      inputRef.current.value = place.formatted_address;
-    });
-  }, []);
+        setHouseNumber(buildingNumber);
+        setStreet(thoroughfare);
+        setCity(town);
+        setState(county);
+        setPostalCode(postcode);
+        setCountry("United Kingdom");
+        setAddress(formatted);
+        setSuggestions([]);
+      }
+    } catch (err) {
+      console.error("Error fetching address details:", err);
+      alert("Unable to retrieve address details.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // 📍 Step 3 — optional: use geolocation
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
@@ -88,68 +94,82 @@ const AddressInput = ({
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude, longitude } = pos.coords;
-        const geocoder = new window.google.maps.Geocoder();
+        try {
+          const res = await fetch(
+            `https://api.getAddress.io/find/${latitude},${longitude}?api-key=${GETADDRESS_API_KEY}`
+          );
+          const data = await res.json();
 
-        geocoder.geocode(
-          { location: { lat: latitude, lng: longitude } },
-          (results, status) => {
-            if (status === "OK" && results[0]) {
-              const place = results[0];
-              const parsed = parseAddressComponents(place.address_components);
+          if (data && data.addresses && data.addresses[0]) {
+            const addr = data.addresses[0];
+            const formatted = Object.values(addr).filter(Boolean).join(", ");
 
-              setAddress(place.formatted_address);
-              setHouseNumber(parsed.houseNumber);
-              setStreet(parsed.street);
-              setCity(parsed.city);
-              setState(parsed.state);
-              setPostalCode(parsed.postalCode);
-              setCountry(parsed.country);
-
-              inputRef.current.value = place.formatted_address;
-            } else {
-              console.error("geocoder failed due to: " + status);
-              alert("Unable to retrieve location " + status);
-            }
+            setAddress(formatted);
+            setHouseNumber(addr.building_number || "");
+            setStreet(addr.thoroughfare || "");
+            setCity(addr.post_town || "");
+            setState(addr.county || "");
+            setPostalCode(addr.postcode || "");
+            setCountry("United Kingdom");
           }
-        );
+        } catch (err) {
+          alert("Unable to retrieve location details");
+          console.error(err);
+        }
       },
       (err) => {
+        alert("Location access denied or unavailable");
         console.error("Geolocation error:", err.message);
-        alert("Location access denied or unavailable" + err.message);
       }
     );
   };
 
   return (
-    
-    <div className="flex flex-col gap-2 w-full">
-      <input
-        type="text"
-        ref={inputRef}
-        placeholder="Start typing your address..."
-        defaultValue={address}
-        onFocus={() => setShowLocationBtn(true)}
-        // onBlur={() => setTimeout(() => setShowLocationBtn(false), 200)}
-        className="input-field transition-all duration-300 focus:ring-2 focus:ring-indigo-500"
-      />
-      <div
-        className={`transition-all duration-500 ease-in-out transform ${
-          showLocationBtn
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
-      ></div>
+    <div className="flex flex-col gap-3 w-full relative">
+      {/* Postcode field + Find button */}
+      <div className="flex gap-2 w-full">
+        <input
+          type="text"
+          placeholder="Enter postcode"
+          value={postcode}
+          onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+          className="flex-grow input-field text-base px-4 py-3"
+        />
+        <button
+          type="button"
+          onClick={findAddressesByPostcode}
+          disabled={loading}
+          className="input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer flex items-center justify-center whitespace-nowrap"
+        >
+          {loading ? "Loading..." : "Find My Address"}
+        </button>
+      </div>
+
+      {/* Dropdown of addresses */}
+      {suggestions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10">
+          {suggestions.map((sug) => (
+            <button
+              key={sug.id}
+              onClick={() => handleSelectAddress(sug)}
+              className="block w-full text-left text-white px-3 py-2 hover:bg-gray-800 transition"
+            >
+              {sug.address}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Use my location button */}
       <button
         type="button"
         onClick={handleUseLocation}
-        className="input-field flex items-center justify-center gap-2 w-full py-2 rounded-lg 
-                     bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md 
-                     transition cursor-pointer"
+        className="input-field flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md cursor-pointer"
       >
         <FontAwesomeIcon icon={faLocationCrosshairs} className="text-white" />
-        Use my location
+        Use My Location
       </button>
     </div>
   );
@@ -188,10 +208,7 @@ const Signup = () => {
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       setErrorMsg(error.message);
@@ -211,7 +228,7 @@ const Signup = () => {
           dob: dateOfBirth || null,
           gender,
           phone_number: phoneNumber,
-          address, 
+          address,
           houseNumber,
           street,
           city,
@@ -304,10 +321,10 @@ const Signup = () => {
           </option>
           <option value="male">Male</option>
           <option value="female">Female</option>
-          <option value="other">gaylord</option>
+          <option value="other">Other</option>
         </select>
 
-        {/* Google Address Input */}
+        {/* Address input */}
         <AddressInput
           address={address}
           setAddress={setAddress}
@@ -319,13 +336,13 @@ const Signup = () => {
           setCountry={setCountry}
         />
 
-        {/* Show parsed fields (optional, remove if not needed) */}
+        {/* Optional: show parsed values */}
         <div className="text-white text-sm space-y-1">
           {houseNumber && <p>House Number: {houseNumber}</p>}
           {street && <p>Street: {street}</p>}
           {city && <p>City: {city}</p>}
-          {state && <p>State: {state}</p>}
-          {postalCode && <p>Postal Code: {postalCode}</p>}
+          {state && <p>County: {state}</p>}
+          {postalCode && <p>Postcode: {postalCode}</p>}
           {country && <p>Country: {country}</p>}
         </div>
 
@@ -346,12 +363,11 @@ const Signup = () => {
         />
 
         {/* Terms */}
-        <label className="text-white flex items-center">
-          <input type="checkbox" className="mr-2" /> I agree to the terms and
-          conditions
+        <label className="text-white flex items-center gap-2">
+          <input type="checkbox" /> I agree to the terms and conditions
         </label>
-        <label className="text-white flex items-center">
-          <input type="checkbox" className="mr-2" /> I agree to marketing emails
+        <label className="text-white flex items-center gap-2">
+          <input type="checkbox" /> I agree to marketing emails
         </label>
 
         {/* Submit */}
