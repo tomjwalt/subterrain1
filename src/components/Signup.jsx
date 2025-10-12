@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays, faLocationCrosshairs} from "@fortawesome/free-solid-svg-icons";
+import {
+  faCalendarDays,
+  faLocationCrosshairs,
+} from "@fortawesome/free-solid-svg-icons";
 import Autocomplete from "react-google-autocomplete";
 
 // Extract street, city, state, postal, country
 const parseAddressComponents = (components) => {
   const result = {
-    houseNumber: "", 
+    houseNumber: "",
     street: "",
     city: "",
     state: "",
@@ -50,18 +53,15 @@ const AddressInput = ({
   setCountry,
 }) => {
   const inputRef = useRef(null);
+  const [showLocationBtn, setShowLocationBtn] = useState(false);
 
   useEffect(() => {
     if (!window.google || !inputRef.current) return;
 
-    const autocomplete = new google.maps.places.PlaceAutocompleteElement(
-      inputRef.current
-    );
-
-    autocomplete.setOptions({
+    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
       types: ["geocode"],
       componentRestrictions: { country: "gb" },
-  });
+    });
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
@@ -109,8 +109,8 @@ const AddressInput = ({
 
               inputRef.current.value = place.formatted_address;
             } else {
-              console.error("geocoder failed due to: " + status)
-              alert("Unable to retrieve location " + status) ;
+              console.error("geocoder failed due to: " + status);
+              alert("Unable to retrieve location " + status);
             }
           }
         );
@@ -123,23 +123,33 @@ const AddressInput = ({
   };
 
   return (
-    <div className="relative w-full">
+    
+    <div className="flex flex-col gap-2 w-full">
       <input
         type="text"
         ref={inputRef}
         placeholder="Start typing your address..."
         defaultValue={address}
-        className="input-field pr-10"
+        onFocus={() => setShowLocationBtn(true)}
+        // onBlur={() => setTimeout(() => setShowLocationBtn(false), 200)}
+        className="input-field transition-all duration-300 focus:ring-2 focus:ring-indigo-500"
       />
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showLocationBtn
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+      ></div>
       <button
         type="button"
         onClick={handleUseLocation}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md shadow-md transition cursor-pointer"
+        className="input-field flex items-center justify-center gap-2 w-full py-2 rounded-lg 
+                     bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md 
+                     transition cursor-pointer"
       >
-        <FontAwesomeIcon 
-        icon={faLocationCrosshairs}
-        className="text-white"
-        />
+        <FontAwesomeIcon icon={faLocationCrosshairs} className="text-white" />
+        Use my location
       </button>
     </div>
   );
@@ -201,7 +211,7 @@ const Signup = () => {
           dob: dateOfBirth || null,
           gender,
           phone_number: phoneNumber,
-          address, // full formatted address
+          address, 
           houseNumber,
           street,
           city,
@@ -294,7 +304,7 @@ const Signup = () => {
           </option>
           <option value="male">Male</option>
           <option value="female">Female</option>
-          <option value="other">Other</option>
+          <option value="other">gaylord</option>
         </select>
 
         {/* Google Address Input */}
@@ -354,7 +364,7 @@ const Signup = () => {
         {successMsg && <p className="text-green-500">{successMsg}</p>}
       </form>
 
-      <style jsx>{`
+      <style>{`
         .input-field {
           width: 100%;
           padding: 0.75rem;
