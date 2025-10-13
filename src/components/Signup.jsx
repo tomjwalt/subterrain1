@@ -1,10 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCalendarDays,
-  faLocationCrosshairs,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays, faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 
 const GETADDRESS_API_KEY = "mtWbhJyhyU6LW4ucv1SH9Q48183";
 const GOOGLE_API_KEY = "AIzaSyDBPnU6AYyPDTTwUWaMXliQ-HGJk2LqgWk";
@@ -22,10 +19,22 @@ const AddressInput = ({
   const [postcode, setPostcode] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const dropdownRef = useRef(null);
 
-  // Get list of addresses by postcode (GetAddress.io)
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch list of addresses by postcode (GetAddress.io)
   const findAddressesByPostcode = async () => {
-    if (!postcode) {
+    if (!postcode.trim()) {
       alert("Please enter a postcode");
       return;
     }
@@ -39,7 +48,7 @@ const AddressInput = ({
       );
       const data = await response.json();
 
-      if (data && data.suggestions) {
+      if (data?.suggestions?.length) {
         setSuggestions(data.suggestions);
       } else {
         alert("No addresses found for that postcode");
@@ -53,7 +62,7 @@ const AddressInput = ({
     }
   };
 
-  // Select an address to fill form
+  // Fetch full address details from GetAddress.io
   const handleSelectAddress = async (sug) => {
     setLoading(true);
     try {
@@ -63,20 +72,13 @@ const AddressInput = ({
       const data = await response.json();
 
       if (data) {
-        const buildingNumber = data.building_number || "";
-        const thoroughfare = data.thoroughfare || "";
-        const town = data.post_town || "";
-        const county = data.county || "";
-        const postcode = data.postcode || "";
-        const formatted = data.formatted_address.join(", ");
-
-        setHouseNumber(buildingNumber);
-        setStreet(thoroughfare);
-        setCity(town);
-        setState(county);
-        setPostalCode(postcode);
+        setHouseNumber(data.building_number || "");
+        setStreet(data.thoroughfare || "");
+        setCity(data.post_town || "");
+        setState(data.county || "");
+        setPostalCode(data.postcode || "");
         setCountry("United Kingdom");
-        setAddress(formatted);
+        setAddress(data.formatted_address.join(", "));
         setSuggestions([]);
       }
     } catch (err) {
@@ -90,14 +92,14 @@ const AddressInput = ({
   // Use My Location (Google Maps API)
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert("Geolocation not supported by your browser");
       return;
     }
 
+    setLoading(true);
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-
+      async ({ coords }) => {
+        const { latitude, longitude } = coords;
         try {
           const response = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
@@ -107,70 +109,66 @@ const AddressInput = ({
           if (data.status === "OK" && data.results.length > 0) {
             const result = data.results[0];
             const components = result.address_components;
+            const get = (type) =>
+              components.find((c) => c.types.includes(type))?.long_name || "";
 
-            const getComponent = (type) => {
-              const comp = components.find((c) => c.types.includes(type));
-              return comp ? comp.long_name : "";
-            };
-
-            const houseNumber = getComponent("street_number");
-            const street = getComponent("route");
-            const city =
-              getComponent("postal_town") ||
-              getComponent("locality") ||
-              getComponent("administrative_area_level_2");
-            const state = getComponent("administrative_area_level_1");
-            const postalCode = getComponent("postal_code");
-            const country = getComponent("country");
-            const formatted = result.formatted_address;
-
-            setHouseNumber(houseNumber);
-            setStreet(street);
-            setCity(city);
-            setState(state);
-            setPostalCode(postalCode);
-            setCountry(country);
-            setAddress(formatted);
+            setHouseNumber(get("street_number"));
+            setStreet(get("route"));
+            setCity(get("postal_town") || get("locality"));
+            setState(get("administrative_area_level_1"));
+            setPostalCode(get("postal_code"));
+            setCountry(get("country"));
+            setAddress(result.formatted_address);
           } else {
             alert("Could not find address from your location.");
           }
         } catch (err) {
-          console.error("Error fetching location details:", err);
+          console.error("Error fetching location:", err);
           alert("Unable to retrieve location details.");
+        } finally {
+          setLoading(false);
         }
       },
       (err) => {
-        alert("Location access denied or unavailable");
         console.error("Geolocation error:", err.message);
+        alert("Location access denied or unavailable.");
+        setLoading(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full relative">
-      {/* Postcode + Find button */}
-      <div className="flex gap-2 w-full">
+    <div className="flex flex-col gap-3 w-full relative" ref={dropdownRef}>
+      {/* Postcode input and find button */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          findAddressesByPostcode();
+        }}
+        className="flex gap-2 items-center w-full"
+      >
         <input
           type="text"
           placeholder="Enter postcode"
           value={postcode}
           onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-          className="input-field text-base px-4 py-3 flex-grow"
+          className="input-field flex-grow text-base px-4 py-3"
         />
         <button
-          type="button"
-          onClick={findAddressesByPostcode}
+          type="submit"
           disabled={loading}
-          className="input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer flex items-center justify-center whitespace-nowrap px-4 py-3"
+          className={`input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer flex items-center justify-center whitespace-nowrap px-4 py-3 transition ${
+            loading ? "opacity-50 cursor-wait" : ""
+          }`}
         >
           {loading ? "Loading..." : "Find My Address"}
         </button>
-      </div>
+      </form>
 
-      {/* Dropdown */}
+      {/* Dropdown list */}
       {suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10">
+        <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
           {suggestions.map((sug) => (
             <button
               key={sug.id}
@@ -183,13 +181,16 @@ const AddressInput = ({
         </div>
       )}
 
-      {/* Use My Location */}
+      {/* Use my location */}
       <button
         type="button"
         onClick={handleUseLocation}
-        className="input-field flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md cursor-pointer px-4 py-3"
+        disabled={loading}
+        className={`input-field flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md px-4 py-3 transition ${
+          loading ? "opacity-50 cursor-wait" : "cursor-pointer"
+        }`}
       >
-        <FontAwesomeIcon icon={faLocationCrosshairs} className="text-white" />
+        <FontAwesomeIcon icon={faLocationCrosshairs} />
         Use My Location
       </button>
     </div>
@@ -206,8 +207,6 @@ const Signup = () => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-
-  // Address fields
   const [address, setAddress] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [street, setStreet] = useState("");
@@ -215,7 +214,6 @@ const Signup = () => {
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
-
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -237,7 +235,6 @@ const Signup = () => {
     }
 
     const user = data.user;
-
     if (user) {
       const { error: profileError } = await supabase.from("profiles").insert([
         {
@@ -263,89 +260,41 @@ const Signup = () => {
       if (profileError) {
         setErrorMsg(profileError.message);
       } else {
-        setSuccessMsg(
-          "Successfully signed up. Check your email to confirm your account."
-        );
+        setSuccessMsg("Successfully signed up. Check your email to confirm your account.");
       }
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black overflow-visible">
+    <div className="flex items-center justify-center min-h-screen bg-black">
       <form
         onSubmit={handleSignUp}
-        className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-gray-900 p-6 shadow-md overflow-visible"
+        className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-gray-900 p-6 shadow-md"
       >
-        {/* Names */}
-        <input
-          type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Middle Name"
-          value={middleName}
-          onChange={(e) => setMiddleName(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          className="input-field"
-        />
+        {/* Basic inputs */}
+        <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Middle Name" value={middleName} onChange={(e) => setMiddleName(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-field" />
 
-        {/* Email */}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="input-field"
-        />
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
 
-        {/* Date of Birth */}
+        {/* Date of birth */}
         <div className="relative">
-          <input
-            type="date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            className="input-field"
-          />
-          <FontAwesomeIcon
-            icon={faCalendarDays}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none"
-          />
+          <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="input-field" />
+          <FontAwesomeIcon icon={faCalendarDays} className="absolute right-3 top-1/2 -translate-y-1/2 text-white" />
         </div>
 
-        {/* Phone */}
-        <input
-          type="tel"
-          placeholder="Phone Number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="input-field"
-        />
+        <input type="tel" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="input-field" />
 
         {/* Gender */}
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="input-field"
-        >
-          <option value="" disabled>
-            Select Gender
-          </option>
+        <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field">
+          <option value="" disabled>Select Gender</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>
 
-        {/* Address input */}
+        {/* Address block */}
         <AddressInput
           address={address}
           setAddress={setAddress}
@@ -357,7 +306,7 @@ const Signup = () => {
           setCountry={setCountry}
         />
 
-        {/* Parsed values (optional) */}
+        {/* Show parsed address */}
         <div className="text-white text-sm space-y-1">
           {houseNumber && <p>House Number: {houseNumber}</p>}
           {street && <p>Street: {street}</p>}
@@ -368,22 +317,10 @@ const Signup = () => {
         </div>
 
         {/* Passwords */}
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input-field"
-        />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+        <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" />
 
-        {/* Terms */}
+        {/* Checkboxes */}
         <label className="text-white flex items-center gap-2">
           <input type="checkbox" /> I agree to the terms and conditions
         </label>
@@ -392,9 +329,7 @@ const Signup = () => {
         </label>
 
         {/* Submit */}
-        <button type="submit" className="btn-submit">
-          Sign Up
-        </button>
+        <button type="submit" className="btn-submit">Sign Up</button>
 
         {/* Messages */}
         {errorMsg && <p className="text-red-500">{errorMsg}</p>}
@@ -413,8 +348,8 @@ const Signup = () => {
           transition: all 0.2s;
         }
         .input-field:focus {
-          box-shadow: 0 0 2px white;
           border-color: white;
+          box-shadow: 0 0 2px white;
         }
         .btn-submit {
           width: 100%;
@@ -427,8 +362,8 @@ const Signup = () => {
           transition: all 0.2s;
         }
         .btn-submit:hover {
-          box-shadow: 0 0 2px white;
           border-color: white;
+          box-shadow: 0 0 2px white;
         }
       `}</style>
     </div>
