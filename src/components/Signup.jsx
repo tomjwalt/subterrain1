@@ -70,7 +70,7 @@ const AddressInput = ({
     setLoading(true);
     try {
       const response = await fetch(
-        https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}
+        `https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}`
       );
       const data = await response.json();
 
@@ -103,7 +103,7 @@ const AddressInput = ({
         const { latitude, longitude } = pos.coords;
         try {
           const response = await fetch(
-            https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
           );
           const data = await response.json();
 
