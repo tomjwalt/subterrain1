@@ -22,40 +22,20 @@ const AddressInput = ({
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
-<<<<<<< Updated upstream
   const [captchaToken, setCaptchaToken] = useState(null);
 
   // Close dropdown when clicking outside
-=======
-
->>>>>>> Stashed changes
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setSuggestions([]);
       }
-<<<<<<< Updated upstream
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-=======
 
-      const handleEscape = (event) => {
-        if (event.key === "Escape") setSuggestions([]);
-      };
-
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleEscape);
-
-      return () => {
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEscape);
-      };
-    };
-  })
->>>>>>> Stashed changes
-
+  // Fetch addresses via GetAddress.io
   const findAddressesByPostcode = async () => {
     if (!postcode) {
       alert("Please enter a postcode");
@@ -90,7 +70,7 @@ const AddressInput = ({
     setLoading(true);
     try {
       const response = await fetch(
-        `https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}`
+        https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}
       );
       const data = await response.json();
 
@@ -123,7 +103,7 @@ const AddressInput = ({
         const { latitude, longitude } = pos.coords;
         try {
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
+            https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}
           );
           const data = await response.json();
 
@@ -194,7 +174,6 @@ const AddressInput = ({
           </button>
         </form>
 
-<<<<<<< Updated upstream
         {suggestions.length > 0 && (
           <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
             {suggestions.map((sug) => (
@@ -209,30 +188,6 @@ const AddressInput = ({
           </div>
         )}
       </div>
-=======
-      {/* Dropdown */}
-      {suggestions.length > 0 && (
-        <div
-          ref={dropdownRef}
-          className="absolute top-full left-0 right-0 bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg shadow-md mt-2 z-10 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
-          style={{
-            maxHeight: "240px",
-            overflowY: "auto",
-            scrollbarWidth: "thin",
-          }}
-        >
-          {suggestions.map((sug) => (
-            <button
-              key={sug.id}
-              onClick={() => handleSelectAddress(sug)}
-              className="block w-full text-left text-white px-3 py-2 hover:bg-gray-600 transition cursor-pointer hover:bg-gray-800 hover:text-gray-400 transition-colors duration-150 ease-in-out"
-            >
-              {sug.address}
-            </button>
-          ))}
-        </div>
-      )}
->>>>>>> Stashed changes
 
       {/* Use My Location Button */}
       <button
@@ -462,7 +417,6 @@ const Signup = () => {
           className="input-field"
         />
 
-<<<<<<< Updated upstream
         {/* checkboxes */}
         <label className="text-white flex items-center gap-2">
           <input type="checkbox" />I agree to the terms and conditions
@@ -484,21 +438,6 @@ const Signup = () => {
         <button type="submit" className="btn-submit">
           Sign Up
         </button>
-=======
-        {/* Checkboxes */}
-        <label className="text-white flex items-center gap-2">
-          <input type="checkbox" /> I agree to the terms and conditions
-        </label>
-        <label className="text-white flex items-center gap-2">
-          <input type="checkbox" /> I agree to marketing emails
-        </label>
-
-        {/* submit button */}
-
-        <button type="submit" className="btn-submit">Sign Up</button>
->>>>>>> Stashed changes
-
-        {/* error messages */}
 
         {errorMsg && <p className="text-red-500">{errorMsg}</p>}
         {successMsg && <p className="text-green-500">{successMsg}</p>}
