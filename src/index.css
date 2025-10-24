@@ -56,3 +56,33 @@
 .pac-container:after {
   display: none !important; /* hide if you don’t want branding */
 }
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOutDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px)scale(0.96);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.fade-out-down {
+  animation: fadeOutDown 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

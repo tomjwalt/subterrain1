@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCalendarDays,
-  faLocationCrosshairs,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays, faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const GETADDRESS_API_KEY = "mtWbhJyhyU6LW4ucv1SH9Q48183";
@@ -22,9 +19,8 @@ const AddressInput = ({
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
-  const [captchaToken, setCaptchaToken] = useState(null);
 
-  // Close dropdown when clicking outside
+  // close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -35,37 +31,26 @@ const AddressInput = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch addresses via GetAddress.io
   const findAddressesByPostcode = async () => {
     if (!postcode) {
       alert("Please enter a postcode");
       return;
     }
-
     setLoading(true);
     try {
       const response = await fetch(
-        `https://api.getAddress.io/autocomplete/${encodeURIComponent(
-          postcode
-        )}?api-key=${GETADDRESS_API_KEY}`
+        `https://api.getAddress.io/autocomplete/${encodeURIComponent(postcode)}?api-key=${GETADDRESS_API_KEY}`
       );
       const data = await response.json();
-
-      if (data && data.suggestions) {
-        setSuggestions(data.suggestions);
-      } else {
-        alert("No addresses found for that postcode");
-        setSuggestions([]);
-      }
+      setSuggestions(data?.suggestions || []);
     } catch (err) {
       console.error("Error fetching addresses:", err);
-      alert("Failed to fetch addresses. Check API key or connection.");
+      alert("Failed to fetch addresses.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Select from dropdown
   const handleSelectAddress = async (sug) => {
     setLoading(true);
     try {
@@ -73,7 +58,6 @@ const AddressInput = ({
         `https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}`
       );
       const data = await response.json();
-
       if (data) {
         setHouseNumber(data.building_number || data.building_name || "");
         setStreet(data.thoroughfare || "");
@@ -81,8 +65,8 @@ const AddressInput = ({
         setState(data.county || "");
         setPostalCode(data.postcode || "");
         setCountry("United Kingdom");
-        setSuggestions([]);
       }
+      setSuggestions([]);
     } catch (err) {
       console.error("Error fetching address details:", err);
       alert("Unable to retrieve address details.");
@@ -91,10 +75,9 @@ const AddressInput = ({
     }
   };
 
-  // Use My Location (Google)
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert("Geolocation not supported");
       return;
     }
 
@@ -106,39 +89,25 @@ const AddressInput = ({
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
           );
           const data = await response.json();
+          const result = data.results[0];
+          const components = result.address_components;
+          const getComp = (type) => components.find((c) => c.types.includes(type))?.long_name || "";
 
-          if (data.status === "OK" && data.results.length > 0) {
-            const result = data.results[0];
-            const components = result.address_components;
-
-            const getComponent = (type) => {
-              const comp = components.find((c) => c.types.includes(type));
-              return comp ? comp.long_name : "";
-            };
-
-            setHouseNumber(getComponent("street_number"));
-            setStreet(getComponent("route"));
-            setCity(
-              getComponent("postal_town") ||
-                getComponent("locality") ||
-                getComponent("administrative_area_level_2")
-            );
-            setState(getComponent("administrative_area_level_1"));
-            setPostalCode(getComponent("postal_code"));
-            setCountry(getComponent("country"));
-          } else {
-            alert("Could not find address from your location.");
-          }
+          setHouseNumber(getComp("street_number"));
+          setStreet(getComp("route"));
+          setCity(getComp("postal_town") || getComp("locality"));
+          setState(getComp("administrative_area_level_1"));
+          setPostalCode(getComp("postal_code"));
+          setCountry(getComp("country"));
         } catch (err) {
-          console.error("Error fetching location details:", err);
-          alert("Unable to retrieve location details.");
+          console.error(err);
+          alert("Failed to fetch location details.");
         }
       },
       (err) => {
         alert("Location access denied or unavailable");
-        console.error("Geolocation error:", err.message);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        console.error(err.message);
+      }
     );
   };
 
@@ -170,12 +139,12 @@ const AddressInput = ({
             disabled={loading}
             className="input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer px-4 py-3"
           >
-            {loading ? "Loading..." : "Find My Address"}
+            {loading ? "Loading..." : "Find Address"}
           </button>
         </form>
 
         {suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+          <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10 max-h-60 overflow-y-auto">
             {suggestions.map((sug) => (
               <button
                 key={sug.id}
@@ -189,7 +158,6 @@ const AddressInput = ({
         )}
       </div>
 
-      {/* Use My Location Button */}
       <button
         type="button"
         onClick={handleUseLocation}
@@ -221,6 +189,8 @@ const Signup = () => {
   const [country, setCountry] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -247,35 +217,21 @@ const Signup = () => {
       return;
     }
 
-    const user = data.user;
-    if (user) {
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: user.id,
-          email,
-          first_name: firstName,
-          middle_name: middleName,
-          last_name: lastName,
-          dob: dateOfBirth || null,
-          gender,
-          phone_number: phoneNumber,
-          house_number: houseNumber,
-          street,
-          city,
-          state,
-          postal_code: postalCode,
-          country,
-        },
-      ]);
+    setEmailSent(true);
+    setSuccessMsg("Signup successful! Please check your email to verify your account.");
+  };
 
-      if (profileError) {
-        setErrorMsg(profileError.message);
-      } else {
-        setSuccessMsg(
-          "Successfully signed up. Check your email to confirm your account."
-        );
-      }
+  const resendVerification = async () => {
+    if (!email) {
+      setErrorMsg("Enter your email to resend verification.");
+      return;
     }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+    if (error) setErrorMsg(error.message);
+    else setSuccessMsg("Verification email resent! Check your inbox.");
   };
 
   return (
@@ -284,149 +240,43 @@ const Signup = () => {
         onSubmit={handleSignUp}
         className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-gray-900 p-6 shadow-md"
       >
-        {/* Basic Info */}
-        <input
-          type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Middle Name"
-          value={middleName}
-          onChange={(e) => setMiddleName(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="input-field"
-        />
+        <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Middle Name" value={middleName} onChange={(e) => setMiddleName(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-field" />
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
 
         <div className="relative">
-          <input
-            type="date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            className="input-field"
-          />
-          <FontAwesomeIcon
-            icon={faCalendarDays}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none"
-          />
+          <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="input-field" />
+          <FontAwesomeIcon icon={faCalendarDays} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
         </div>
 
-        <input
-          type="tel"
-          placeholder="Phone Number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="input-field"
-        />
+        <input type="tel" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="input-field" />
 
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="input-field"
-        >
-          <option value="" disabled>
-            Select Gender
-          </option>
+        <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field">
+          <option value="" disabled>Select Gender</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>
 
-        {/* Address Section */}
-        <AddressInput
-          setHouseNumber={setHouseNumber}
-          setStreet={setStreet}
-          setCity={setCity}
-          setState={setState}
-          setPostalCode={setPostalCode}
-          setCountry={setCountry}
-        />
+        <AddressInput setHouseNumber={setHouseNumber} setStreet={setStreet} setCity={setCity} setState={setState} setPostalCode={setPostalCode} setCountry={setCountry} />
 
-        <input
-          type="text"
-          placeholder="House Name / Number"
-          value={houseNumber}
-          onChange={(e) => setHouseNumber(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Street"
-          value={street}
-          onChange={(e) => setStreet(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="City"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="County"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Postcode"
-          value={postalCode}
-          onChange={(e) => setPostalCode(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="text"
-          placeholder="Country"
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          className="input-field"
-        />
+        <input type="text" placeholder="House Name / Number" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Street" value={street} onChange={(e) => setStreet(e.target.value)} className="input-field" />
+        <input type="text" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} className="input-field" />
+        <input type="text" placeholder="County" value={state} onChange={(e) => setState(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Postcode" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} className="input-field" />
 
-        {/* Passwords */}
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input-field"
-        />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+        <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" />
 
-        {/* checkboxes */}
         <label className="text-white flex items-center gap-2">
           <input type="checkbox" />I agree to the terms and conditions
         </label>
-
         <label className="text-white flex items-center gap-2">
           <input type="checkbox" />I agree to marketing emails
         </label>
-
-        {/* captcha */}
 
         <ReCAPTCHA
           sitekey="6Lcslu8rAAAAAMLjcMQ6ZZut5wODSgoxAK_zHy1S"
@@ -435,9 +285,13 @@ const Signup = () => {
           style={{ transform: "scale(0.85)", transformOrigin: "0 0" }}
         />
 
-        <button type="submit" className="btn-submit">
-          Sign Up
-        </button>
+        <button type="submit" className="btn-submit">Sign Up</button>
+
+        {emailSent && (
+          <button type="button" onClick={resendVerification} className="btn-submit bg-indigo-600 mt-2 hover:bg-indigo-700">
+            Resend Verification Email
+          </button>
+        )}
 
         {errorMsg && <p className="text-red-500">{errorMsg}</p>}
         {successMsg && <p className="text-green-500">{successMsg}</p>}
