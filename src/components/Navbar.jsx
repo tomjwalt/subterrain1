@@ -5,8 +5,9 @@ import CheckoutModal from "./CheckoutModal.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping, faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import Login from "./Login.jsx";
 
-const Navbar = ({ onLoginClick, onCheckoutClick }) => {
+const Navbar = ({ onLoginHoverStart, onLoginHoverEnd, onCheckoutClick, onLoginClick }) => {
   return (
     <header className="relative flex items-center justify-center h-36">
       {/* Logo on the left */}
@@ -37,8 +38,12 @@ const Navbar = ({ onLoginClick, onCheckoutClick }) => {
         </button>
       </div>
 
-      {/* Login Button */}
-      <div className="absolute right-4">
+      {/* Login Button (hover to open modal, click for full page) */}
+      <div
+        className="absolute right-4"
+        onMouseEnter={onLoginHoverStart}
+        onMouseLeave={onLoginHoverEnd}
+      >
         <button
           className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform"
           onClick={onLoginClick}
@@ -46,6 +51,7 @@ const Navbar = ({ onLoginClick, onCheckoutClick }) => {
           <FontAwesomeIcon icon={faUser} />
         </button>
       </div>
+
     </header>
   );
 };
