@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays, faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays, faLocationCrosshairs, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const GETADDRESS_API_KEY = "mtWbhJyhyU6LW4ucv1SH9Q48183";
@@ -58,10 +58,16 @@ const AddressInput = ({
         `https://api.getAddress.io/get/${sug.id}?api-key=${GETADDRESS_API_KEY}`
       );
       const data = await response.json();
+
+      console.log("GetAddress data:", data);
+
       if (data) {
+
+        const getCity = (d) => d.post_town || d.district || d.town_or_city || d.locality || d.town || d.village || d.hamlet || "";
+
         setHouseNumber(data.building_number || data.building_name || "");
         setStreet(data.thoroughfare || "");
-        setCity(data.post_town || "");
+        setCity(getCity(data));
         setState(data.county || "");
         setPostalCode(data.postcode || "");
         setCountry("United Kingdom");
@@ -134,8 +140,10 @@ const AddressInput = ({
             }}
             className="input-field flex-grow px-4 py-3"
           />
+
           <button
-            type="submit"
+            type="button"
+            onClick={findAddressesByPostcode}
             disabled={loading}
             className="input-field bg-black border border-gray-700 text-white hover:border-white hover:shadow-white/40 cursor-pointer px-4 py-3"
           >
@@ -146,13 +154,14 @@ const AddressInput = ({
         {suggestions.length > 0 && (
           <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-md mt-2 z-10 max-h-60 overflow-y-auto">
             {suggestions.map((sug) => (
-              <button
+              <div
                 key={sug.id}
                 onClick={() => handleSelectAddress(sug)}
-                className="block w-full text-left text-white px-3 py-2 hover:bg-gray-800 transition cursor-pointer"
+                className="p-2 bg-gray-800 border border-transparent rounded-md cursor-pointer 
+               hover:bg-gray-700 hover:border-white transition-all duration-200 ease-in-out text-white"
               >
                 {sug.address}
-              </button>
+              </div>
             ))}
           </div>
         )}
@@ -234,42 +243,63 @@ const Signup = () => {
     else setSuccessMsg("Verification email resent! Check your inbox.");
   };
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-black">
       <form
         onSubmit={handleSignUp}
         className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-gray-900 p-6 shadow-md"
       >
-        <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-field" />
+        <input type="text" placeholder="First Name*" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-field" />
         <input type="text" placeholder="Middle Name" value={middleName} onChange={(e) => setMiddleName(e.target.value)} className="input-field" />
-        <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-field" />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Last Name*" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-field" />
+        <input type="email" placeholder="Email*" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
 
         <div className="relative">
           <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="input-field" />
           <FontAwesomeIcon icon={faCalendarDays} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
         </div>
 
-        <input type="tel" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="input-field" />
+        <input type="tel" placeholder="Phone Number*" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="input-field" />
 
         <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field">
           <option value="" disabled>Select Gender</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
-          <option value="other">Other</option>
+          <option value="prefer-not-to-say">Prefer Not To Say</option>
         </select>
 
         <AddressInput setHouseNumber={setHouseNumber} setStreet={setStreet} setCity={setCity} setState={setState} setPostalCode={setPostalCode} setCountry={setCountry} />
 
-        <input type="text" placeholder="House Name / Number" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} className="input-field" />
-        <input type="text" placeholder="Street" value={street} onChange={(e) => setStreet(e.target.value)} className="input-field" />
+        <input type="text" placeholder="House Name / Number*" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Street*" value={street} onChange={(e) => setStreet(e.target.value)} className="input-field" />
         <input type="text" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} className="input-field" />
         <input type="text" placeholder="County" value={state} onChange={(e) => setState(e.target.value)} className="input-field" />
-        <input type="text" placeholder="Postcode" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="input-field" />
+        <input type="text" placeholder="Postcode*" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="input-field" />
         <input type="text" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} className="input-field" />
 
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
-        <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" />
+        <div className="relative">
+          <input type={showPassword ? "text" : "password"} placeholder="Password*" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field pr-10" />
+
+          <FontAwesomeIcon
+            icon={showPassword ? faEyeSlash : faEye}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white cursor-pointer transition-opacity duration-200"
+            onClick={() => setShowPassword(!showPassword)}
+          />
+        </div>
+
+        <div className="relative">
+          <input type={showConfirmPassword ? "text" : "password" } placeholder="Confirm Password*" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field pr-10" />
+
+          <FontAwesomeIcon
+            icon={showConfirmPassword ? faEyeSlash : faEye}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white cursor-pointer transition-opacity duration-200"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          />
+        </div>
 
         <label className="text-white flex items-center gap-2">
           <input type="checkbox" />I agree to the terms and conditions
