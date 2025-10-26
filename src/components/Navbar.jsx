@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping, faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import Login from "./Login.jsx";
+import UserMenu from "./UserMenu";
+
 
 const Navbar = ({ onLoginHoverStart, onLoginHoverEnd, onCheckoutClick, onLoginClick }) => {
   return (
@@ -40,16 +42,12 @@ const Navbar = ({ onLoginHoverStart, onLoginHoverEnd, onCheckoutClick, onLoginCl
 
       {/* Login Button (hover to open modal, click for full page) */}
       <div
-        className="absolute right-4"
+        className="absolute right-4 cursor-pointer"
         onMouseEnter={onLoginHoverStart}
         onMouseLeave={onLoginHoverEnd}
       >
-        <button
-          className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform"
-          onClick={onLoginClick}
-        >
-          <FontAwesomeIcon icon={faUser} />
-        </button>
+       <UserMenu className="cursor-pointer" onLoginClick={() => setShowLoginModal(true)} />
+          {/* <FontAwesomeIcon icon={faUser} /> */}
       </div>
 
     </header>

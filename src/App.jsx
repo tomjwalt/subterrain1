@@ -9,6 +9,8 @@ import Checkout from "./components/Checkout.jsx";
 import Signup from "./components/Signup.jsx";
 import Login from "./components/Login.jsx";
 import LoginModal from "./components/LoginModal.jsx";
+import ResetPassword from "./components/ResetPassword.jsx"
+import SubNavbar from "./components/SubNavbar.jsx"
 
 import "./App.css";
 
@@ -17,10 +19,16 @@ const stripePromise = loadStripe(
 );
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+
+  //handles Logout Function
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  }
 
   // When hovering starts (on icon or modal)
   const handleLoginHoverStart = () => {
@@ -66,6 +74,8 @@ function App() {
         onCheckoutClick={() => navigate("/checkout")}
       />
 
+      <SubNavbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+
       <Elements stripe={stripePromise}>
         <Routes>
           <Route path="/" element={<Homepage />} />
@@ -75,6 +85,7 @@ function App() {
             path="/login"
             element={<Login onSignupRedirect={handleSignupRedirect} />}
           />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </Elements>
 
@@ -83,9 +94,8 @@ function App() {
         <div
           onMouseEnter={handleLoginHoverStart}
           onMouseLeave={handleLoginHoverEnd}
-          className={`fixed top-14 right-6 z-50 ${
-            isClosing ? "fade-out-down" : "fade-in-up"
-          }`}
+          className={`fixed top-14 right-6 z-50 ${isClosing ? "fade-out-down" : "fade-in-up"
+            }`}
           onAnimationEnd={() => {
             if (isClosing) {
               setIsClosing(false);
