@@ -28,7 +28,7 @@ const LoginForm = ({ onSignupRedirect }) => {
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${window.location.origin}/`, 
+                    redirectTo: `${window.location.origin}/`,
                     queryParams: { prompt: "select_account" },
                 },
             });
@@ -37,6 +37,24 @@ const LoginForm = ({ onSignupRedirect }) => {
         } catch (err) {
             console.error(`Error with ${provider} login:`, err.message);
             alert("Login failed. Please try again.");
+        }
+    };
+
+    // Forgot Password
+
+    const handleForgotPassword = async () => {
+        const email = prompt("Enter your email to reset your password")
+
+        if (!email) return;
+
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: "http://localhost:5173/reset-password",
+        });
+
+        if (error) {
+            alert("Error: " + error.message);
+        } else {
+            alert("Password reset link sent, Please check your email.");
         }
     };
 
@@ -70,6 +88,13 @@ const LoginForm = ({ onSignupRedirect }) => {
                 />
             </div>
 
+            <p
+                onClick={() => handleForgotPassword()}
+                className="text-sm text-gray-400 hover:text-white cursor-pointer text-right mt-1"
+            >
+                Forgot password?
+            </p>
+
             <button
                 type="submit"
                 disabled={loading}
@@ -83,7 +108,7 @@ const LoginForm = ({ onSignupRedirect }) => {
                 <button
                     type="button"
                     onClick={() => handleOAuthLogin("google")}
-                    className="flex items-center justify-center w-full h-10 cursor-pointer"
+                    className="flex items-center justify-center w-full h-10 cursor-pointer hover:opacity-80"
                 >
                     <img src={GoogleSignInButton} alt="Sign in with Google" className="h-full" />
                 </button>
@@ -92,7 +117,7 @@ const LoginForm = ({ onSignupRedirect }) => {
                 <button
                     type="button"
                     onClick={() => handleOAuthLogin("facebook")}
-                    className="flex items-center justify-center w-full h-10 cursor-pointer"
+                    className="flex items-center justify-center w-full h-10 cursor-pointer hover:opacity-80"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="240" height="40" viewBox="0 0 240 40" fill="none">
                         <rect width="240" height="40" rx="20" fill="#131314" stroke="#8E918F" strokeWidth="1" />

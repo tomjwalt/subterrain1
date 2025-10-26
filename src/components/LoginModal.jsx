@@ -41,7 +41,7 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          queryParams: {prompt: "select_account"},
+          queryParams: { prompt: "select_account" },
         },
       });
 
@@ -51,6 +51,24 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
       console.error(`OAuth login error: ${err.message}`);
       alert(`Login failed with ${provider}. Please try again.`);
     }
+  };
+
+  // Forgot Password
+
+  const handleForgotPassword = async () => {
+    const email = prompt("Enter your email to reset your password")
+
+    if(!email) return;
+
+    const {data, error} = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost:5173/reset-password",
+    });
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("Password reset link sent, Please check your email.");
+      }
   };
 
   return (
@@ -94,6 +112,13 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
             required
           />
 
+          <p
+            onClick={() => handleForgotPassword()}
+            className="text-sm text-gray-400 hover:text-white cursor-pointer text-right mt-1"
+          >
+            Forgot password?
+          </p>
+
           {error && (
             <p className="text-red-400 text-xs text-center">{error}</p>
           )}
@@ -101,9 +126,8 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
           <button
             type="submit"
             disabled={loading}
-            className={`mt-2 border border-gray-700 text-white py-2 rounded-md bg-black transition hover:border-white ${
-              loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-            }`}
+            className={`mt-2 border border-gray-700 text-white py-2 rounded-md bg-black transition hover:border-white ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+              }`}
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
