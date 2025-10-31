@@ -41,13 +41,11 @@ const Navbar = ({ onLoginHoverStart, onLoginHoverEnd, onCheckoutClick, onLoginCl
       </div>
 
       {/* Login Button (hover to open modal, click for full page) */}
-      <div
-        className="absolute right-4 cursor-pointer"
+      <div className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform"
         onMouseEnter={onLoginHoverStart}
         onMouseLeave={onLoginHoverEnd}
-      >
-       <UserMenu className="cursor-pointer" onLoginClick={() => setShowLoginModal(true)} />
-          {/* <FontAwesomeIcon icon={faUser} /> */}
+        >
+        <FontAwesomeIcon icon={faUser} />
       </div>
 
     </header>
