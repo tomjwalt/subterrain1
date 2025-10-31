@@ -1,144 +1,58 @@
 import React, { useEffect, useState } from "react";
-import {
-  useStripe,
-  useElements,
-  PaymentRequestButtonElement,
-  CardElement,
-} from "@stripe/react-stripe-js";
+import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
 
 const Checkout = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const [paymentRequest, setPaymentRequest] = useState(null);
-  const [totalAmount, setTotalAmount] = useState(2499);
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [buildingNumber, setBuildingNumber] = useState("");
-  const [street, setStreet] = useState("");
-  const [postCode, setPostCode] = useState("");
-  const [county, setCounty] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!stripe) return;
+    // Fetch client secret from backend
+    fetch("http://localhost:4242/create-payment-intent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: 1999, currency: "usd" }), // Example: $19.99
+    })
+      .then((res) => res.json())
+      .then((data) => setClientSecret(data.clientSecret));
+  }, []);
 
-    const pr = stripe.paymentRequest({
-      country: "GB",
-      currency: "gbp",
-      total: {
-        label: "Total",
-        amount: totalAmount,
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!stripe || !elements) return;
+
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/order-confirmation`,
       },
-      requestPayerName: true,
-      requestPayerEmail: true,
     });
 
-    pr.canMakePayment().then((result) => {
-      if (result) {
-        setPaymentRequest(pr);
-      }
-    });
-  }, [stripe, totalAmount]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    // Add your payment handling logic here
+    if (error) setMessage(error.message);
+    setLoading(false);
   };
 
+  if (!clientSecret) return <p className="text-white">Loading payment form...</p>;
+
   return (
-    <div className="p-6 text-white">
-      <h2>Checkout Page</h2>
-      <h3>Total: £{totalAmount / 100}</h3>
-      {paymentRequest && (
-        <PaymentRequestButtonElement options={{ paymentRequest }} />
-      )}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
+      <h1 className="text-3xl mb-6 font-semibold">Checkout</h1>
 
-      {/* Name fields */}
-      <div className="flex flex-col mb-4 justify-center items-center">
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="First Name*"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="Middle Name(s)"
-          value={middleName}
-          onChange={(e) => setMiddleName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="Last Name*"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          required
-        />
-      </div>
-
-      {/* Billing address */}
-      <div className="flex flex-col items-center justify-center">
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="Building Number/Name*"
-          value={buildingNumber}
-          onChange={(e) => setBuildingNumber(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="Street*"
-          value={street}
-          onChange={(e) => setStreet(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="Postal Code*"
-          value={postCode}
-          onChange={(e) => setPostCode(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="City*"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="County*"
-          value={county}
-          onChange={(e) => setCounty(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          className="w-50 p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
-          placeholder="Country*"
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          required
-        />
-      </div>
-
-      {/* Stripe card fields */}
-      <form className="flex flex-col items-center justify-center mt-5 text-white" onSubmit={handleSubmit}>
-        <CardElement className="w-50 p-2 rounded-lg border border-gray-700" />
-        <button className="text-white cursor-pointer w-80 p-2 rounded-lg bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500 mb-6" type="submit">Pay</button>
+      <form onSubmit={handleSubmit} className="bg-[#121212] p-8 rounded-2xl shadow-lg w-[400px]">
+        <PaymentElement />
+        <button
+          disabled={!stripe || loading}
+          className={`mt-6 w-full py-2 rounded-lg transition-all ${
+            loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {loading ? "Processing..." : "Pay Now"}
+        </button>
+        {message && <p className="mt-4 text-red-400 text-center">{message}</p>}
       </form>
     </div>
   );

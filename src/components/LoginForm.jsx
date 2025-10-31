@@ -21,7 +21,7 @@ const LoginForm = ({ onSignupRedirect }) => {
         } finally {
             setLoading(false);
         }
-    };
+    };s
 
     const handleOAuthLogin = async (provider) => {
         try {
