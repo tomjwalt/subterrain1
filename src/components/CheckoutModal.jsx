@@ -5,7 +5,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping, faUser, faXmark  } from "@fortawesome/free-solid-svg-icons";
 
-const stripePromise = loadStripe("***REMOVED***_YOUR_KEY_HERE");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
 
 const CheckoutModal = ({ onClose }) => {
   return (
