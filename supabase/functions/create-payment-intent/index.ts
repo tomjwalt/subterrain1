@@ -21,7 +21,7 @@ serve(async (req) => {
 
   try {
     if (!STRIPE_SECRET_KEY) {
-      console.error("❌ Missing STRIPE_SECRET_KEY in environment");
+      console.error(" Missing STRIPE_SECRET_KEY in environment");
       return new Response(
         JSON.stringify({ error: "Missing STRIPE_SECRET_KEY" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
@@ -38,7 +38,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`💳 Creating payment intent for ${amount} ${currency}`);
+    console.log(` Creating payment intent for ${amount} ${currency}`);
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
