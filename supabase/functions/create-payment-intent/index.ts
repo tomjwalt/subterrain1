@@ -1,61 +1,97 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@12.6.0";
+// supabase/functions/create-payment-intent/index.ts
 
-// Load the Stripe secret key from the environment
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+import Stripe from "https://esm.sh/stripe@12.17.0?target=deno";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 serve(async (req) => {
-  const url = new URL(req.url);
+  // CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
 
-  // Debug route to show whether env variables loaded
-  if (url.searchParams.get("debug") === "env") {
-    return new Response(
-      JSON.stringify({
-        hasStripeKey: !!STRIPE_SECRET_KEY,
-        stripeKeyPreview: STRIPE_SECRET_KEY?.slice(0, 10) + "...",
-        envKeys: Deno.env.toObject ? Object.keys(Deno.env.toObject()) : [],
-      }),
-      { headers: { "Content-Type": "application/json" } }
-    );
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Only POST allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
+    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
     if (!STRIPE_SECRET_KEY) {
-      console.error(" Missing STRIPE_SECRET_KEY in environment");
+      console.error("❌ Missing STRIPE_SECRET_KEY");
       return new Response(
         JSON.stringify({ error: "Missing STRIPE_SECRET_KEY" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
-    const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
-    const { amount, currency = "gbp" } = await req.json();
+    const stripe = new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: "2022-11-15",
+    });
 
-    if (!amount) {
+    const body = await req.json().catch(() => ({}));
+    const amount = body?.amount;
+    const currency = body?.currency ?? "gbp";
+    const email = body?.email; // ✅ now actually defined
+
+    // Validate amount (integer in smallest unit)
+    if (
+      amount === undefined ||
+      amount === null ||
+      Number.isNaN(Number(amount)) ||
+      !Number.isInteger(Number(amount)) ||
+      Number(amount) <= 0
+    ) {
       return new Response(
-        JSON.stringify({ error: "Missing payment amount" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          error:
+            "Invalid or missing 'amount'. Must be a positive integer in smallest currency unit (e.g., pence).",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
-
-    console.log(` Creating payment intent for ${amount} ${currency}`);
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: Number(amount),
       currency,
-      automatic_payment_methods: { enabled: true },
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never",
+      },
+      // ✅ store email for your webhook to use
+      metadata: email ? { email } : {},
+      // ✅ optional: lets Stripe attach receipt email
+      receipt_email: email ?? undefined,
     });
 
     return new Response(
       JSON.stringify({ clientSecret: paymentIntent.client_secret }),
-      { headers: { "Content-Type": "application/json" } }
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
-
   } catch (err) {
-    console.error("🔥 Payment intent error:", err);
-    return new Response(
-      JSON.stringify({ error: err.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    console.error("STRIPE ERROR:", err);
+    const message = err instanceof Error ? err.message : String(err);
+
+    return new Response(JSON.stringify({ error: message }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

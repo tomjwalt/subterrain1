@@ -32,3 +32,8 @@ supabase/functions/**/.env
 
 # Ignore tar archives
 *.tar.gz
+
+
+# supabase local temp
+supabase/.temp/
+supabase/.temp/cli-latest

@@ -4,9 +4,12 @@ import { loadStripe } from "@stripe/stripe-js";
 import Checkout from "./Checkout";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
+console.log("PK from env:", import.meta.env.VITE_STRIPE_PK);
+
 
 const CheckoutWrapper = () => {
   const [clientSecret, setClientSecret] = useState(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchIntent = async () => {
@@ -21,9 +24,11 @@ const CheckoutWrapper = () => {
         );
 
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to create PI");
         setClientSecret(data.clientSecret);
       } catch (error) {
         console.error("Failed to load clientSecret:", error);
+        setMessage("Failed to load payment form.");
       }
     };
 
@@ -31,11 +36,21 @@ const CheckoutWrapper = () => {
   }, []);
 
   if (!clientSecret) {
-    return <p className="text-white text-center mt-10">Loading payment form...</p>;
+    return (
+      <p className="text-white text-center mt-10">
+        {message || "Loading payment form..."}
+      </p>
+    );
   }
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        appearance: { theme: "night" },
+      }}
+    >
       <Checkout />
     </Elements>
   );
