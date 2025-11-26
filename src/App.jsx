@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-
+import CheckoutModal from "./components/CheckoutModal.jsx"
 import Navbar from "./components/Navbar.jsx";
 import Homepage from "./components/Homepage.jsx";
 import CheckoutWrapper from "./components/CheckoutWrapper.jsx";
@@ -8,16 +8,28 @@ import Signup from "./components/Signup.jsx";
 import Login from "./components/Login.jsx";
 import LoginModal from "./components/LoginModal.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
-import SubNavbar from "./components/SubNavbar.jsx";
 import OrderConfirmation from "./components/OrderConfirmation.jsx";
 
 import "./App.css";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+
+   const [cartItems] = useState([
+    {
+      id: "tee-1",
+      name: "SubTerrain Performance Tee",
+      size: "M",
+      colour: "Black / Reflective",
+      price: 24.99,
+      quantity: 1,
+    },
+  ]);
+
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -53,16 +65,22 @@ function App() {
     navigate("/signup");
   };
 
+  // Called when login succeeds from the modal
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setShowLoginModal(false);
+    setIsClosing(false);
+  };
+
   return (
     <>
       <Navbar
         onLoginHoverStart={handleLoginHoverStart}
         onLoginHoverEnd={handleLoginHoverEnd}
         onLoginClick={handleLoginClick}
-        onCheckoutClick={() => navigate("/checkout")}
+        onCheckoutClick={() => setShowCheckoutModal(true)}
       />
 
-      <SubNavbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
 
       <Routes>
         <Route path="/" element={<Homepage />} />
@@ -80,8 +98,9 @@ function App() {
         <div
           onMouseEnter={handleLoginHoverStart}
           onMouseLeave={handleLoginHoverEnd}
-          className={`fixed top-14 right-6 z-50 ${isClosing ? "fade-out-down" : "fade-in-up"
-            }`}
+          className={`fixed top-14 right-6 z-50 ${
+            isClosing ? "fade-out-down" : "fade-in-up"
+          }`}
           onAnimationEnd={() => {
             if (isClosing) {
               setIsClosing(false);
@@ -90,10 +109,28 @@ function App() {
           }}
         >
           <LoginModal
+            isLoggedIn={isLoggedIn}
             onClose={startCloseModal}
             onSignupRedirect={handleSignupRedirect}
+            onLoginSuccess={handleLoginSuccess}
+            onLogout={handleLogout}
+            onGoToOrders={() => navigate("/orders")}
+            onGoToLikes={() => navigate("/likes")}
+            onGoToAddresses={() => navigate("/addresses")}
           />
         </div>
+      )}
+
+      {showCheckoutModal && (
+        <CheckoutModal
+          cartItems={cartItems}
+          shippingCost={0} // swap for your real shipping logic
+          onClose={() => setShowCheckoutModal(false)}
+          onGoToCheckout={() => {
+            setShowCheckoutModal(false);
+            navigate("/checkout");
+          }}
+        />
       )}
     </>
   );

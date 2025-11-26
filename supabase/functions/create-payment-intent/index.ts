@@ -41,11 +41,15 @@ serve(async (req) => {
     });
 
     const body = await req.json().catch(() => ({}));
-    const amount = body?.amount;
-    const currency = body?.currency ?? "gbp";
-    const email = body?.email; // ✅ now actually defined
 
-    // Validate amount (integer in smallest unit)
+    const {
+      amount,
+      currency = "gbp",
+      email,
+      orderId,  // e.g. your orders.id from Supabase
+      userId,   // optional: supabase auth user id
+    } = body ?? {};
+
     if (
       amount === undefined ||
       amount === null ||
@@ -56,7 +60,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           error:
-            "Invalid or missing 'amount'. Must be a positive integer in smallest currency unit (e.g., pence).",
+            "Invalid or missing 'amount'. Must be a positive integer in smallest currency unit (e.g. pence).",
         }),
         {
           status: 400,
@@ -72,9 +76,13 @@ serve(async (req) => {
         enabled: true,
         allow_redirects: "never",
       },
-      // ✅ store email for your webhook to use
-      metadata: email ? { email } : {},
-      // ✅ optional: lets Stripe attach receipt email
+      // store stuff we’ll read in the webhook
+      metadata: {
+        email: email ?? "",
+        orderId: orderId ?? "",
+        userId: userId ?? "",
+      },
+      // optional but handy: Stripe can send its own receipt too
       receipt_email: email ?? undefined,
     });
 
@@ -86,7 +94,7 @@ serve(async (req) => {
       },
     );
   } catch (err) {
-    console.error("STRIPE ERROR:", err);
+    console.error("STRIPE ERROR (create-payment-intent):", err);
     const message = err instanceof Error ? err.message : String(err);
 
     return new Response(JSON.stringify({ error: message }), {
