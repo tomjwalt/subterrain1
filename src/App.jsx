@@ -1,6 +1,7 @@
+// src/App.jsx
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import CheckoutModal from "./components/CheckoutModal.jsx"
+import CheckoutModal from "./components/CheckoutModal.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Homepage from "./components/Homepage.jsx";
 import CheckoutWrapper from "./components/CheckoutWrapper.jsx";
@@ -19,7 +20,7 @@ function App() {
   const [isHovered, setIsHovered] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
-   const [cartItems] = useState([
+  const [cartItems] = useState([
     {
       id: "tee-1",
       name: "SubTerrain Performance Tee",
@@ -32,6 +33,7 @@ function App() {
 
   const navigate = useNavigate();
 
+  // --- LOGIN HANDLERS ---
   const handleLogout = () => {
     setIsLoggedIn(false);
   };
@@ -65,11 +67,29 @@ function App() {
     navigate("/signup");
   };
 
-  // Called when login succeeds from the modal
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
     setShowLoginModal(false);
     setIsClosing(false);
+  };
+
+  // --- CART / CHECKOUT HANDLERS ---
+  const handleCartHoverStart = () => {
+    if (window.cartCloseTimeout) {
+      clearTimeout(window.cartCloseTimeout);
+    }
+    setShowCheckoutModal(true);
+  };
+
+  const handleCartHoverEnd = () => {
+    window.cartCloseTimeout = setTimeout(() => {
+      setShowCheckoutModal(false);
+    }, 250); // small delay so moving from icon → popup doesn’t insta-close
+  };
+
+  const handleCartClick = () => {
+    setShowCheckoutModal(false);
+    navigate("/checkout");
   };
 
   return (
@@ -78,9 +98,10 @@ function App() {
         onLoginHoverStart={handleLoginHoverStart}
         onLoginHoverEnd={handleLoginHoverEnd}
         onLoginClick={handleLoginClick}
-        onCheckoutClick={() => setShowCheckoutModal(true)}
+        onCartHoverStart={handleCartHoverStart}
+        onCartHoverEnd={handleCartHoverEnd}
+        onCheckoutClick={handleCartClick}
       />
-
 
       <Routes>
         <Route path="/" element={<Homepage />} />
@@ -122,15 +143,21 @@ function App() {
       )}
 
       {showCheckoutModal && (
-        <CheckoutModal
-          cartItems={cartItems}
-          shippingCost={0} // swap for your real shipping logic
-          onClose={() => setShowCheckoutModal(false)}
-          onGoToCheckout={() => {
-            setShowCheckoutModal(false);
-            navigate("/checkout");
-          }}
-        />
+        <div
+          className="fixed top-20 right-6 z-50"
+          onMouseEnter={handleCartHoverStart}
+          onMouseLeave={handleCartHoverEnd}
+        >
+          <CheckoutModal
+            cartItems={cartItems}
+            shippingCost={0}
+            onClose={() => setShowCheckoutModal(false)}
+            onGoToCheckout={() => {
+              setShowCheckoutModal(false);
+              navigate("/checkout");
+            }}
+          />
+        </div>
       )}
     </>
   );

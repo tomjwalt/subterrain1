@@ -1,15 +1,19 @@
+// src/components/Navbar.jsx
 import React from "react";
 import logo from "../assets/S-logo-removebg.png";
 import TitlePiece from "../assets/white-title-removebg.png";
-import CheckoutModal from "./CheckoutModal.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping, faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import Login from "./Login.jsx";
-import UserMenu from "./UserMenu";
 
-
-const Navbar = ({ onLoginHoverStart, onLoginHoverEnd, onCheckoutClick, onLoginClick }) => {
+const Navbar = ({
+  onLoginHoverStart,
+  onLoginHoverEnd,
+  onLoginClick,
+  onCartHoverStart,
+  onCartHoverEnd,
+  onCheckoutClick,
+}) => {
   return (
     <header className="relative flex items-center justify-center h-36">
       {/* Logo on the left */}
@@ -30,24 +34,27 @@ const Navbar = ({ onLoginHoverStart, onLoginHoverEnd, onCheckoutClick, onLoginCl
         </Link>
       </div>
 
-      {/* Checkout Button */}
+      {/* Cart / Checkout Button */}
       <div className="absolute right-16">
         <button
           className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform"
-          onClick={onCheckoutClick}
+          onMouseEnter={onCartHoverStart}   // 👉 open basket modal
+          onMouseLeave={onCartHoverEnd}     // 👉 close basket modal
+          onClick={onCheckoutClick}         // 👉 go to /checkout
         >
           <FontAwesomeIcon icon={faCartShopping} />
         </button>
       </div>
 
-      {/* Login Button (hover to open modal, click for full page) */}
-      <div className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform"
+      {/* Login Button (hover to show modal, click to go to /login) */}
+      <div
+        className="absolute right-4 text-white text-2xl cursor-pointer hover:scale-110 transition-transform"
         onMouseEnter={onLoginHoverStart}
         onMouseLeave={onLoginHoverEnd}
-        >
+        onClick={onLoginClick} // 👉 this was missing before
+      >
         <FontAwesomeIcon icon={faUser} />
       </div>
-
     </header>
   );
 };
