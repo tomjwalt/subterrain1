@@ -1,6 +1,7 @@
 // src/App.jsx
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
+
 import CheckoutModal from "./components/CheckoutModal.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Homepage from "./components/Homepage.jsx";
@@ -10,6 +11,7 @@ import Login from "./components/Login.jsx";
 import LoginModal from "./components/LoginModal.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
 import OrderConfirmation from "./components/OrderConfirmation.jsx";
+import PersonalDetails from "./components/PersonalDetails.jsx"; // 👈 make sure this file exists
 
 import "./App.css";
 
@@ -33,7 +35,7 @@ function App() {
 
   const navigate = useNavigate();
 
-  // --- LOGIN HANDLERS ---
+  // ---------- LOGIN HANDLERS ----------
   const handleLogout = () => {
     setIsLoggedIn(false);
   };
@@ -73,7 +75,7 @@ function App() {
     setIsClosing(false);
   };
 
-  // --- CART / CHECKOUT HANDLERS ---
+  // ---------- CART / CHECKOUT HANDLERS ----------
   const handleCartHoverStart = () => {
     if (window.cartCloseTimeout) {
       clearTimeout(window.cartCloseTimeout);
@@ -84,7 +86,7 @@ function App() {
   const handleCartHoverEnd = () => {
     window.cartCloseTimeout = setTimeout(() => {
       setShowCheckoutModal(false);
-    }, 250); // small delay so moving from icon → popup doesn’t insta-close
+    }, 250);
   };
 
   const handleCartClick = () => {
@@ -113,6 +115,8 @@ function App() {
         />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
+        <Route path="/personal-details" element={<PersonalDetails />} />
+        {/* you can add /orders, /likes, /addresses later if you want */}
       </Routes>
 
       {(showLoginModal || isClosing) && (
@@ -137,7 +141,7 @@ function App() {
             onLogout={handleLogout}
             onGoToOrders={() => navigate("/orders")}
             onGoToLikes={() => navigate("/likes")}
-            onGoToAddresses={() => navigate("/addresses")}
+            onGoToPersonalDetails={() => navigate("/personal-details")}
           />
         </div>
       )}

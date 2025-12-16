@@ -4,9 +4,14 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useNavigate } from "react-router-dom";
 import Checkout from "./Checkout";
-import { supabase } from "../../supabaseClient"; // keep this path the same as in your project
+import { supabase } from "../../supabaseClient";
 
+// Stripe publishable key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
+
+// TEMP: hard-coded to the working Edge Function URL
+const CREATE_PI_URL =
+  "https://nyebwdvhkgiumqswbrfb.functions.supabase.co/create-payment-intent";
 
 const CheckoutWrapper = () => {
   const navigate = useNavigate();
@@ -28,7 +33,12 @@ const CheckoutWrapper = () => {
   // 1) Check if user is logged in
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error("Error getting user:", error);
+      }
+
       if (data?.user) {
         setUser(data.user);
         if (data.user.email) {
@@ -37,6 +47,7 @@ const CheckoutWrapper = () => {
       }
       setAuthChecked(true);
     };
+
     checkUser();
   }, []);
 
@@ -46,32 +57,31 @@ const CheckoutWrapper = () => {
     setLoading(true);
 
     try {
-      const trimmed = emailForPI.trim();
+      const trimmed = (emailForPI || "").trim();
 
       if (!trimmed) {
         throw new Error("Missing email address for checkout.");
       }
 
-      const res = await fetch(
-        "http://127.0.0.1:54321/functions/v1/create-payment-intent",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: 2499,
-            currency: "gbp",
-            email: trimmed,
-            // orderId: "TEMP-ORDER-ID-123", // later we’ll wire in a real order id
-          }),
-        }
-      );
+      console.log("🔹 Calling Edge Function:", CREATE_PI_URL);
 
-      const data = await res.json();
+      // NOTE: no custom headers → simple POST → avoids preflight CORS
+      const res = await fetch(CREATE_PI_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          amount: 2499, // in pence
+          currency: "gbp",
+          email: trimmed,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
       console.log("🔹 Supabase response (checkout):", data);
 
       if (!res.ok) {
         throw new Error(data.error || "Failed to create payment intent");
       }
+
       if (!data.clientSecret) {
         throw new Error("No clientSecret returned from server");
       }
@@ -94,13 +104,12 @@ const CheckoutWrapper = () => {
 
     // logged-in flow – skip guest options
     createPaymentIntent(user.email || "");
-  }, [authChecked, user]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authChecked, user]);
 
   // Still checking auth?
   if (!authChecked) {
-    return (
-      <p className="text-white text-center mt-10">Loading checkout...</p>
-    );
+    return <p className="text-white text-center mt-10">Loading checkout...</p>;
   }
 
   // ---- NOT LOGGED IN: Step 1 – choose login vs guest ----
@@ -201,17 +210,17 @@ const CheckoutWrapper = () => {
     return (
       <p className="text-white text-center mt-10">
         Something went wrong loading the payment form.
-        {errorMsg && <span className="block text-red-400 mt-2">{errorMsg}</span>}
+        {errorMsg && (
+          <span className="block text-red-400 mt-2">{errorMsg}</span>
+        )}
       </p>
     );
   }
 
   const handleBackFromPayment = () => {
     if (user) {
-      // Logged in user: going "back" from payment can just land them on homepage or account.
       navigate("/");
     } else {
-      // Guest: go back to guest-email step
       setClientSecret(null);
       setStep("guest-email");
     }

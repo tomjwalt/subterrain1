@@ -121,12 +121,9 @@ enabled = true
 port = 54327
 backend = "postgres"
 
+
 # ---------------------------------------
-# IMPORTANT: PUBLIC PAYMENT FUNCTION
+# PUBLIC STRIPE PAYMENT FUNCTION
 # ---------------------------------------
 [functions.create-payment-intent]
 verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false
-

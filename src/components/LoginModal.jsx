@@ -1,14 +1,21 @@
-// src/components/LoginModal.jsx
 import React, { useRef, useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient.js";
 import GoogleSignInButton from "../assets/web_dark_rd_ctn.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
-const LoginModal = ({ onClose, onSignupRedirect }) => {
+const LoginModal = ({
+  onClose,
+  onSignupRedirect,
+  onLoginSuccess,       
+  onLogout,                
+  onGoToOrders,          
+  onGoToLikes,            
+  onGoToPersonalDetails,
+}) => {
   const modalRef = useRef(null);
 
-  // auth / user state
+  // user state
   const [user, setUser] = useState(null);
   const [checkingUser, setCheckingUser] = useState(true);
 
@@ -64,6 +71,7 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
       if (error) throw error;
 
       // Supabase listener will setUser() for us
+      if (onLoginSuccess) onLoginSuccess();
       alert("Logged in successfully!");
       onClose && onClose();
     } catch (err) {
@@ -113,13 +121,14 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
     try {
       await supabase.auth.signOut();
       setUser(null);
+      if (onLogout) onLogout();
       onClose && onClose();
     } catch (err) {
       console.error("Logout error:", err.message);
     }
   };
 
-  // --- Auto-close hover behaviour (your existing logic) ---
+  // --- Auto-close hover behaviour ---
   const handleMouseLeave = () => {
     window.closeLoginTimeout = setTimeout(() => {
       onClose && onClose();
@@ -131,6 +140,13 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
       clearTimeout(window.closeLoginTimeout);
       window.closeLoginTimeout = null;
     }
+  };
+
+  // convenience helpers so we always close modal after nav
+  const goTo = (fn) => {
+    if (!fn) return;
+    fn();
+    onClose && onClose();
   };
 
   return (
@@ -165,26 +181,35 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
             </p>
 
             <div className="flex flex-col gap-2 mb-4 text-sm">
-              <button className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition">
+              <button
+                onClick={() => goTo(onGoToOrders)}
+                className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition cursor-pointer"
+              >
                 Orders
               </button>
-              <button className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition">
+              <button
+                onClick={() => goTo(onGoToLikes)}
+                className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition cursor-pointer"
+              >
                 Likes
               </button>
-              <button className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition">
-                Addresses
+              <button
+                onClick={() => goTo(onGoToPersonalDetails)}
+                className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition cursor-pointer"
+              >
+                Account Details
               </button>
             </div>
 
             <button
               onClick={handleLogout}
-              className="w-full mt-2 border border-red-500 text-red-400 py-2 rounded-md bg-black hover:bg-red-600 hover:text-white transition"
+              className="w-full mt-2 border border-red-500 text-red-400 py-2 rounded-md bg-black hover:bg-red-600 hover:text-white transition cursor-pointer"
             >
               Log out
             </button>
           </>
         ) : (
-          // ---------- NOT LOGGED-IN VIEW (your original form) ----------
+          // ---------- NOT LOGGED-IN VIEW ----------
           <>
             <h2 className="text-xl font-semibold mb-4 text-center">Log In</h2>
 
@@ -249,7 +274,6 @@ const LoginModal = ({ onClose, onSignupRedirect }) => {
                   onClick={() => handleOAuthLogin("facebook")}
                   className="flex items-center justify-center w-full h-10 cursor-pointer hover:opacity-80 transition"
                 >
-                  {/* your SVG unchanged */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="240"
