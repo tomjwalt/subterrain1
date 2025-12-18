@@ -1,4 +1,3 @@
-// src/App.jsx
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
@@ -11,7 +10,9 @@ import Login from "./components/Login.jsx";
 import LoginModal from "./components/LoginModal.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
 import OrderConfirmation from "./components/OrderConfirmation.jsx";
-import PersonalDetails from "./components/PersonalDetails.jsx"; // 👈 make sure this file exists
+import PersonalDetails from "./components/PersonalDetails.jsx";
+import LikesPage from "./components/LikesPage.jsx";
+import OrdersPage from "./components/OrdersPage.jsx";
 
 import "./App.css";
 
@@ -116,7 +117,8 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="/personal-details" element={<PersonalDetails />} />
-        {/* you can add /orders, /likes, /addresses later if you want */}
+        <Route path="/likes" element={<LikesPage />}/>
+        <Route path="/orders" element={<OrdersPage />}/>
       </Routes>
 
       {(showLoginModal || isClosing) && (

@@ -1,0 +1,44 @@
+// src/data/products.js
+
+export const products = [
+  {
+    id: "tee-1",
+    name: "SubTerrain Performance Tee",
+    category: "T-Shirts",
+    price: 2499, // in pence
+    badge: "Featured",
+    imageUrl: "/images/products/performance-tee.jpg", // swap for real path
+    description: "Lightweight, sweat-wicking performance tee built for brutal sessions.",
+    featured: true,
+  },
+  {
+    id: "tee-2",
+    name: "SubTerrain Oversized Tee",
+    category: "T-Shirts",
+    price: 2799,
+    badge: "New",
+    imageUrl: "/images/products/oversized-tee.jpg",
+    description: "Heavyweight oversized tee with SubTerrain geometry detailing.",
+    featured: true,
+  },
+  {
+    id: "hoodie-1",
+    name: "SubTerrain Armour Hoodie",
+    category: "Hoodies",
+    price: 4499,
+    badge: "Drop 01",
+    imageUrl: "/images/products/armour-hoodie.jpg",
+    description: "Midweight hoodie designed for commutes, warm-ups, and late night reps.",
+    featured: false,
+  },
+  {
+    id: "shorts-1",
+    name: "SubTerrain Motion Shorts",
+    category: "Shorts",
+    price: 2999,
+    badge: "Bestseller",
+    imageUrl: "/images/products/motion-shorts.jpg",
+    description: "4-way stretch shorts that won’t fight your depth.",
+    featured: false,
+  },
+];
