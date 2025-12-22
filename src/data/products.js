@@ -1,11 +1,9 @@
-// src/data/products.js
-
 export const products = [
   {
     id: "tee-1",
     name: "SubTerrain Performance Tee",
     category: "T-Shirts",
-    price: 2499, // in pence
+    price: 2499,
     badge: "Featured",
     imageUrl: "/images/products/performance-tee.jpg", // swap for real path
     description: "Lightweight, sweat-wicking performance tee built for brutal sessions.",

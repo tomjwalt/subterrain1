@@ -13,6 +13,7 @@ import OrderConfirmation from "./components/OrderConfirmation.jsx";
 import PersonalDetails from "./components/PersonalDetails.jsx";
 import LikesPage from "./components/LikesPage.jsx";
 import OrdersPage from "./components/OrdersPage.jsx";
+import ProductPage from "./components/ProductPage.jsx";
 
 import "./App.css";
 
@@ -119,6 +120,7 @@ function App() {
         <Route path="/personal-details" element={<PersonalDetails />} />
         <Route path="/likes" element={<LikesPage />}/>
         <Route path="/orders" element={<OrdersPage />}/>
+        <Route path="/product/:productId" element={< ProductPage/>}/>
       </Routes>
 
       {(showLoginModal || isClosing) && (
