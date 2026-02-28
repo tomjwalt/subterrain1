@@ -7,4 +7,18 @@
   background-color: #070808;
 }
 
+header {
+  /* display: flex; */
+  /* justify-content: space-between; */
+  /* align-items: center; */
+  /* height: 10rem; */
+  overflow: hidden;
+  margin-bottom: 25px;
+}
 
+.sub-navbar {
+  height: 50px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: auto; /* Allows internal scrolling if necessary */
+}

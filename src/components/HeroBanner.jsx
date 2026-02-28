@@ -6,71 +6,36 @@ const HeroBanner = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative overflow-hidden bg-black text-white pt-24 pb-16 px-4">
-      <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-[2fr,1.3fr] items-center">
+    <section className="rounded-3xl border border-zinc-800 overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2">
         {/* Left: copy */}
-        <div>
-          <p className="text-[11px] tracking-[0.3em] uppercase text-gray-400 mb-4">
-            SubTerrain / Drop 01
+        <div className="p-6 md:p-8 flex flex-col justify-center gap-3 bg-black">
+          <p className="text-[0.7rem] uppercase tracking-[0.3em] text-zinc-500">
+            Subterrain
           </p>
 
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-wide mb-4">
-            Built for basements, <br className="hidden md:block" />
-            car parks & 2 a.m. sessions.
+          <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
+            The Hardway is The Point.
           </h1>
 
-          <p className="text-sm md:text-base text-gray-300 max-w-xl mb-8">
-            Technical streetwear for people who train when everyone else has
-            gone home. Heavy fabrics, clean geometry, zero noise.
+          <p className="text-sm text-zinc-400 max-w-md">
+            Hevay fabrics keeping you dry and looking <br /> really gay when youre running
           </p>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex gap-3 mt-2">
             <button
-              onClick={() => navigate("/shop")}
-              className="px-6 py-3 rounded-full bg-white text-black text-sm font-medium tracking-wide hover:bg-gray-200 transition"
+              onClick={() => navigate("/product/tee-1")}
+              className="px-4 py-2 rounded-full bg-white text-black text-xs font-medium hover:bg-zinc-200 transition"
             >
-              Shop the drop
-            </button>
-
-            <button
-              onClick={() => {
-                const section = document.getElementById("featured-products");
-                if (section) section.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="px-6 py-3 rounded-full border border-gray-600 text-sm text-gray-100 hover:border-gray-300 hover:bg-gray-900 transition"
-            >
-              View featured pieces
+              View featured
             </button>
           </div>
         </div>
 
-        {/* Right: placeholder artwork area */}
-        <div className="relative">
-          <div className="aspect-[4/5] rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-900 via-black to-zinc-950 overflow-hidden">
-            {/* Replace this whole inner block with your final artwork later */}
-            <div className="w-full h-full flex flex-col items-center justify-between p-6">
-              <div className="w-full flex justify-between text-[11px] text-gray-500">
-                <span>STN-01</span>
-                <span>PERFORMANCE / STUDIO</span>
-              </div>
-
-              <div className="text-center">
-                <p className="text-xs tracking-[0.3em] uppercase text-gray-400 mb-3">
-                  Visual Placeholder
-                </p>
-                <p className="text-lg font-medium">
-                  Drop artwork goes here.
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Swap this block for your finished promo image or video.
-                </p>
-              </div>
-
-              <div className="w-full flex justify-between text-[10px] text-gray-600">
-                <span>SubTerrain / London</span>
-                <span>24·7 / 365</span>
-              </div>
-            </div>
+        {/* Right: artwork strip – full width but short */}
+        <div className="h-40 md:h-48 w-full bg-[radial-gradient(circle_at_top,_#27272a,_#020617)]">
+          <div className="h-full w-full flex items-center justify-center text-[0.7rem] tracking-[0.25em] uppercase text-zinc-500">
+            Artwork / campaign image
           </div>
         </div>
       </div>

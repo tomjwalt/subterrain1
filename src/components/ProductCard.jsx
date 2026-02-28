@@ -1,96 +1,99 @@
 // src/components/ProductCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faThumbsUp, faCartShopping } from "@fortawesome/free-solid-svg-icons";
 
-const formatMoney = (amount, currency = "GBP") => {
-  if (amount == null) return "-";
-  const numeric = Number(amount);
-  if (Number.isNaN(numeric)) return amount;
-
-  const inUnits = numeric / 100; // pence -> pounds
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency,
-  }).format(inUnits);
-};
-
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onAddToCart, onLike }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    // 🔧 later: hook this to your product detail route
     navigate(`/product/${product.id}`);
   };
 
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+
+    if (onAddToCart) {
+      onAddToCart(product, {
+        size: "M",
+        colour: "Black / Reflective",
+        quantity: 1,
+      });
+    }
+  };
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+
+    if (onLike) {
+      onLike(product);
+    }
+  };
+
   return (
-    <div
-      className="group bg-[#0b0b0b] border border-gray-800 rounded-2xl overflow-hidden flex flex-col cursor-pointer hover:border-gray-500 transition"
+    <article
+      className="group bg-zinc-950 border border-zinc-800 rounded-3xl hover:border-zinc-500 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.05)] transition-all duration-200 flex flex-col cursor-pointer"
       onClick={handleClick}
     >
-      {/* Image */}
-      <div className="relative w-full aspect-[4/5] bg-[#151515] overflow-hidden">
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 tracking-wide">
-            IMAGE COMING SOON
-          </div>
-        )}
+      {/* Image area */}
+      <div className="relative h-64 w-full rounded-t-3xl overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.06),_rgba(24,24,27,1)_45%,_rgba(0,0,0,1)_100%)] flex items-center justify-center px-4">
+        <span className="text-[0.72rem] text-zinc-500 tracking-[0.28em] uppercase">
+          Product image
+        </span>
 
         {product.badge && (
-          <div className="absolute top-3 left-3 text-[10px] uppercase tracking-[0.18em] px-2 py-1 rounded-full bg-white/10 border border-white/30 backdrop-blur">
+          <span className="absolute top-4 right-4 text-[0.65rem] uppercase tracking-[0.18em] px-3 py-1 rounded-full border border-zinc-600 bg-black/40 text-zinc-200 backdrop-blur-sm">
             {product.badge}
-          </div>
+          </span>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col px-4 pt-4 pb-3 gap-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500 mb-1">
+      <div className="p-6 pb-8 flex flex-col gap-5">
+        {/* Meta */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[0.68rem] uppercase tracking-[0.28em] text-zinc-500">
               {product.category}
             </p>
-            <h3 className="text-sm font-medium leading-snug line-clamp-2">
+            <h3 className="mt-3 text-3xl font-semibold tracking-wide text-white leading-tight">
               {product.name}
             </h3>
           </div>
-          <div className="text-right whitespace-nowrap text-sm font-semibold">
-            {formatMoney(product.price, "GBP")}
-          </div>
+
+          <span className="text-2xl font-semibold text-white shrink-0 pt-1">
+            £{(product.price / 100).toFixed(2)}
+          </span>
         </div>
 
-        {product.description && (
-          <p className="text-[11px] text-gray-400 line-clamp-2">
-            {product.description}
-          </p>
-        )}
+        {/* Description */}
+        <p className="text-base text-zinc-400 leading-8 min-h-[64px]">
+          {product.description}
+        </p>
 
-        <div className="mt-3 flex items-center justify-between text-[11px]">
+        {/* Actions */}
+        <div className="pt-6 mt-auto px-1 pb-1 flex items-center gap-3 flex-wrap">
           <button
             type="button"
-            className="px-3 py-1 rounded-full border border-gray-700 group-hover:border-gray-300 group-hover:bg-gray-900 transition"
+            onClick={handleAddToCart}
+            className="inline-flex h-11 min-w-[148px] items-center justify-center gap-2 px-5 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold leading-none hover:border-white hover:text-white transition"
           >
-            View details
+            <FontAwesomeIcon icon={faCartShopping} className="text-xs" />
+            <span>Add to cart</span>
           </button>
+
           <button
             type="button"
-            className="text-xs text-gray-400 hover:text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              // 🔧 this is where you’ll call your Supabase "like" insert later
-              console.log("TODO: like product", product.id);
-            }}
+            onClick={handleLike}
+            className="inline-flex h-11 min-w-[148px] items-center justify-center gap-2 px-5 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold leading-none hover:border-white hover:text-white transition"
           >
-            ♡ Like
+            <FontAwesomeIcon icon={faThumbsUp} className="text-xs" />
+            <span>Like</span>
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

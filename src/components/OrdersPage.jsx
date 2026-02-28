@@ -1,4 +1,3 @@
-// src/components/OrdersPage.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
@@ -54,8 +53,8 @@ const OrdersPage = () => {
     loadOrders();
   }, [navigate]);
 
-  const goToShop = () => {
-    navigate("/shop"); // change if your main product grid route is different
+  const goToHomepage = () => {
+    navigate("/"); 
   };
 
   // Helper to show £ from pence (same as checkout 2499 etc.)
@@ -85,7 +84,7 @@ const OrdersPage = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-semibold tracking-wide">Your Orders</h1>
           <button
-            onClick={goToShop}
+            onClick={goToHomepage}
             className="text-sm px-3 py-1 rounded-full border border-gray-600 hover:border-gray-300 hover:bg-gray-900 transition"
           >
             Continue shopping
@@ -106,7 +105,7 @@ const OrdersPage = () => {
               total.
             </p>
             <button
-              onClick={goToShop}
+              onClick={goToHomepage}
               className="px-4 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition"
             >
               Shop now

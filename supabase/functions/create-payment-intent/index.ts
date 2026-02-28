@@ -1,8 +1,7 @@
 // supabase/functions/create-payment-intent/index.ts
-
 import Stripe from "https://esm.sh/stripe@12.17.0?target=deno";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
-// CORS headers so the browser is allowed to call this function
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -10,104 +9,88 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-Deno.serve(async (req: Request): Promise<Response> => {
+serve(async (req) => {
   // --- Handle CORS preflight ---
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
-      status: 204,
-      headers: corsHeaders,
-    });
+    return new Response("ok", { headers: corsHeaders });
   }
 
-  // --- Only POST is allowed for real work ---
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Only POST allowed" }), {
-      status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Only POST is allowed" }),
+      {
+        status: 405,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      },
+    );
   }
 
   try {
     const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
     if (!STRIPE_SECRET_KEY) {
-      console.error("❌ Missing STRIPE_SECRET_KEY in Supabase secrets");
-      return new Response(
-        JSON.stringify({ error: "Missing STRIPE_SECRET_KEY on server" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      throw new Error("Missing STRIPE_SECRET_KEY in environment");
     }
 
     const stripe = new Stripe(STRIPE_SECRET_KEY, {
       apiVersion: "2024-06-20",
     });
 
-    let body: any = {};
-    try {
-      body = await req.json();
-    } catch {
-      body = {};
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      throw new Error("Invalid JSON body");
     }
 
-    const {
-      amount,
-      currency = "gbp",
-      email,
-      orderId,
-      userId,
-    } = body ?? {};
+    const { amount, currency, email, items } = body;
 
-    const parsedAmount = Number(amount);
-
-    if (
-      amount === undefined ||
-      amount === null ||
-      Number.isNaN(parsedAmount) ||
-      !Number.isInteger(parsedAmount) ||
-      parsedAmount <= 0
-    ) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Invalid or missing 'amount'. Must be a positive integer in the smallest currency unit (e.g. pence).",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+    if (typeof amount !== "number" || amount <= 0) {
+      throw new Error("amount (number, in pence) is required");
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: parsedAmount,
-      currency,
+      amount,
+      currency: currency || "gbp",
+      receipt_email: email || undefined,
       automatic_payment_methods: { enabled: true },
       metadata: {
-        email: email ?? "",
-        orderId: orderId ?? "",
-        userId: userId ?? "",
+        ...(email ? { email } : {}),
+        ...(Array.isArray(items)
+          ? {
+              items: items
+                .map((i: any) =>
+                  `${i.id}:${i.quantity ?? 1}@${i.unit_price_pence ?? "?"}`,
+                )
+                .join("|"),
+            }
+          : {}),
       },
-      receipt_email: email ?? undefined,
     });
 
     return new Response(
       JSON.stringify({ clientSecret: paymentIntent.client_secret }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
       },
     );
   } catch (err) {
-    console.error("❌ STRIPE ERROR (create-payment-intent):", err);
-    const message = err instanceof Error ? err.message : String(err);
-
+    console.error("Error in create-payment-intent:", err);
     return new Response(
-      JSON.stringify({ error: message || "Failed to create payment intent" }),
+      JSON.stringify({
+        error:
+          err instanceof Error ? err.message : "Unknown error creating payment intent",
+      }),
       {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
       },
     );
   }

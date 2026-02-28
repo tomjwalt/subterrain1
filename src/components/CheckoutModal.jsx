@@ -1,119 +1,111 @@
 // src/components/CheckoutModal.jsx
 import React, { useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const CheckoutModal = ({
-  onClose,
-  onGoToCheckout,
   cartItems = [],
   shippingCost = 0,
+  onClose,
+  onGoToCheckout,
+  onRemoveFromCart,
 }) => {
-  const { subtotal, totalItems } = useMemo(() => {
-    let subtotal = 0;
-    let totalItems = 0;
+  const hasItems = cartItems.length > 0;
 
-    cartItems.forEach((item) => {
-      const qty = item.quantity ?? 1;
-      const price = item.price ?? 0;
-      subtotal += price * qty;
-      totalItems += qty;
-    });
-
-    return { subtotal, totalItems };
-  }, [cartItems]);
+  const subtotal = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+        0
+      ),
+    [cartItems]
+  );
 
   const total = subtotal + shippingCost;
 
   return (
-    <div className="bg-[#111] text-white rounded-2xl shadow-2xl w-[360px] max-w-[90vw] relative p-6 border border-gray-800">
-      {/* Close Button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 text-xl font-bold text-gray-400 hover:text-white"
-      >
-        <FontAwesomeIcon icon={faXmark} />
-      </button>
+    <div className="w-80 bg-[#111] text-white rounded-2xl shadow-lg border border-zinc-800 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+        <h2 className="text-sm font-semibold">Your Basket</h2>
+        <button
+          onClick={onClose}
+          className="text-xs text-zinc-400 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
 
-      <h2 className="text-lg font-semibold text-center mb-3">Your Basket</h2>
-
-      {cartItems.length === 0 ? (
-        <p className="text-center text-gray-400 py-6 text-sm">
-          Your basket is currently empty.
-        </p>
-      ) : (
-        <>
-          {/* Items */}
-          <div className="max-h-56 overflow-y-auto pr-1 mb-4 space-y-3">
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between bg-black/40 rounded-lg px-3 py-2"
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium text-sm">
-                    {item.name ?? "Product"}
-                  </span>
-                  {item.size && (
-                    <span className="text-xs text-gray-500">
-                      Size: {item.size}
-                    </span>
-                  )}
-                  {item.colour && (
-                    <span className="text-xs text-gray-500">
-                      Colour: {item.colour}
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-right">
-                  <div className="text-sm text-gray-300">
-                    £{(item.price ?? 0).toFixed(2)}
+      {/* Content */}
+      <div className="px-4 py-3 max-h-80 overflow-y-auto text-sm">
+        {!hasItems ? (
+          <p className="text-zinc-400">Your basket is currently empty.</p>
+        ) : (
+          <>
+            <ul className="space-y-3 mb-3">
+              {cartItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3 last:border-0 last:pb-0"
+                >
+                  <div>
+                    <p className="font-medium text-xs">{item.name}</p>
+                    {item.size && (
+                      <p className="text-[0.7rem] text-zinc-400">
+                        Size M · Qty {item.quantity || 1}
+                      </p>
+                    )}
+                    <p className="text-[0.7rem] text-zinc-500">
+                      £{(item.price || 0).toFixed(2)}
+                    </p>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    Qty: {item.quantity ?? 1}
-                  </div>
-                </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onRemoveFromCart && onRemoveFromCart(item.id)
+                    }
+                    className="text-[0.75rem] text-red-400 hover:text-red-300 flex items-center gap-1"
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            {/* Totals */}
+            <div className="border-t border-zinc-800 pt-3 space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Subtotal</span>
+                <span>£{subtotal.toFixed(2)}</span>
               </div>
-            ))}
-          </div>
-
-          {/* Totals */}
-          <div className="border-t border-gray-800 pt-3 text-sm space-y-1 mb-4">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Items ({totalItems})</span>
-              <span>£{subtotal.toFixed(2)}</span>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Shipping</span>
+                <span>{shippingCost === 0 ? "Free" : `£${shippingCost}`}</span>
+              </div>
+              <div className="flex justify-between font-semibold pt-1">
+                <span>Total</span>
+                <span>£{total.toFixed(2)}</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Shipping</span>
-              <span>
-                {shippingCost > 0 ? `£${shippingCost.toFixed(2)}` : "Free"}
-              </span>
-            </div>
-            <div className="flex justify-between font-semibold text-base pt-1">
-              <span>Total</span>
-              <span>£{total.toFixed(2)}</span>
-            </div>
-          </div>
+          </>
+        )}
+      </div>
 
-          {/* Buttons – stacked vertically, same styling */}
-          <div className="flex flex-col gap-2 mt-2 w-full">
-            <button
-              onClick={onClose}
-              className="w-full py-2 cursor-pointer rounded-lg border border-gray-600 text-gray-200 hover:border-white hover:text-white text-sm transition"
-            >
-              Continue shopping
-            </button>
-
-            <button
-              onClick={onGoToCheckout}
-              className="w-full py-2 cursor-pointer rounded-lg border border-gray-600 text-gray-200 hover:border-white hover:text-white text-sm transition"
-            >
-              Proceed to checkout
-            </button>
-          </div>
-        </>
-      )}
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-zinc-800">
+        <button
+          disabled={!hasItems}
+          onClick={onGoToCheckout}
+          className={`w-full py-2 rounded-lg text-xs font-medium uppercase tracking-[0.18em] ${
+            hasItems
+              ? "bg-white text-gray hover:bg-zinc-200"
+              : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+          }`}
+        >
+          Go to checkout
+        </button>
+      </div>
     </div>
   );
 };

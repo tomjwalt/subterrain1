@@ -10,10 +10,10 @@ export const products = [
     featured: true,
   },
   {
-    id: "tee-2",
-    name: "SubTerrain Oversized Tee",
+    id: "Triathlon Pro",
+    name: "Triathlon Pro",
     category: "T-Shirts",
-    price: 2799,
+    price: 3599,
     badge: "New",
     imageUrl: "/images/products/oversized-tee.jpg",
     description: "Heavyweight oversized tee with SubTerrain geometry detailing.",

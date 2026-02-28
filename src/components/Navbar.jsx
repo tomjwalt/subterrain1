@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React from "react";
 import logo from "../assets/S-logo-removebg.png";
 import TitlePiece from "../assets/white-title-removebg.png";

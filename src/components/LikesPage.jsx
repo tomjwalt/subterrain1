@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 
+
 const LikesPage = () => {
   const navigate = useNavigate();
 
@@ -66,9 +67,9 @@ const LikesPage = () => {
     setLikes((prev) => prev.filter((like) => like.id !== likeId));
   };
 
-  const goToShop = () => {
+  const goToHomepage = () => {
    
-    navigate("/shop");
+    navigate("/");
   };
 
   const goToProduct = (productId) => {
@@ -90,7 +91,7 @@ const LikesPage = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-semibold tracking-wide">Your Likes</h1>
           <button
-            onClick={goToShop}
+            onClick={goToHomepage}
             className="text-sm px-3 py-1 rounded-full border border-gray-600 hover:border-gray-300 hover:bg-gray-900 transition"
           >
             Browse products
@@ -110,7 +111,7 @@ const LikesPage = () => {
               Tap the heart icon on a product to save it here.
             </p>
             <button
-              onClick={goToShop}
+              onClick={goToHomepage}
               className="px-4 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition"
             >
               Discover products
@@ -147,7 +148,7 @@ const LikesPage = () => {
                     e.stopPropagation();
                     handleUnlike(like.id);
                   }}
-                  className="self-end text-xs px-3 py-1 rounded-full border border-red-600 text-red-400 hover:bg-red-900/40 transition"
+                  className="cursor-pointer self-end text-xs px-3 py-1 rounded-full border border-red-600 text-red-400 hover:bg-red-900/40 transition"
                 >
                   Remove like
                 </button>

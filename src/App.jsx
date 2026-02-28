@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 import CheckoutModal from "./components/CheckoutModal.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -23,21 +24,10 @@ function App() {
   const [isClosing, setIsClosing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-
-  const [cartItems] = useState([
-    {
-      id: "tee-1",
-      name: "SubTerrain Performance Tee",
-      size: "M",
-      colour: "Black / Reflective",
-      price: 24.99,
-      quantity: 1,
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
 
   const navigate = useNavigate();
 
-  // ---------- LOGIN HANDLERS ----------
   const handleLogout = () => {
     setIsLoggedIn(false);
   };
@@ -59,10 +49,30 @@ function App() {
     if (showLoginModal) setIsClosing(true);
   };
 
-  const handleLoginClick = () => {
+  const handleLoginClick = async () => {
     setShowLoginModal(false);
     setIsClosing(false);
-    navigate("/login");
+
+    try {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error("Error checking auth state:", error);
+        navigate("/signup");
+        return;
+      }
+
+      const loggedIn = !!data?.user;
+
+      if (loggedIn) {
+        navigate("/personal-details");
+      } else {
+        navigate("/signup");
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleLoginClick", err);
+      setShowLoginModal(true);
+    }
   };
 
   const handleSignupRedirect = () => {
@@ -77,7 +87,6 @@ function App() {
     setIsClosing(false);
   };
 
-  // ---------- CART / CHECKOUT HANDLERS ----------
   const handleCartHoverStart = () => {
     if (window.cartCloseTimeout) {
       clearTimeout(window.cartCloseTimeout);
@@ -96,6 +105,97 @@ function App() {
     navigate("/checkout");
   };
 
+  const handleAddToCart = (product, options = {}) => {
+    const selectedSize = options.size || "M";
+    const selectedQuantity = options.quantity || 1;
+    const selectedColour = options.colour || "Black / Reflective";
+
+    setCartItems((prev) => {
+      const existing = prev.find(
+        (item) => item.id === product.id && item.size === selectedSize
+      );
+
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id && item.size === selectedSize
+            ? { ...item, quantity: item.quantity + selectedQuantity }
+            : item
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          size: selectedSize,
+          quantity: selectedQuantity,
+          colour: selectedColour,
+        },
+      ];
+    });
+  };
+
+  const handleRemoveFromCart = (itemId) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const handleLikeFromCard = async (product) => {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error("Error checking user for like:", userError);
+        return;
+      }
+
+      if (!user) {
+        navigate("/signup");
+        return;
+      }
+
+      const { data: existingLike, error: existingError } = await supabase
+        .from("likes")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("product_id", product.id)
+        .maybeSingle();
+
+      if (existingError) {
+        console.error("Error checking existing like:", existingError);
+        return;
+      }
+
+      if (existingLike?.id) {
+        const { error: deleteError } = await supabase
+          .from("likes")
+          .delete()
+          .eq("id", existingLike.id);
+
+        if (deleteError) {
+          console.error("Error removing like from card:", deleteError);
+        }
+
+        return;
+      }
+
+      const { error: insertError } = await supabase.from("likes").insert({
+        user_id: user.id,
+        product_id: product.id,
+      });
+
+      if (insertError) {
+        console.error("Error inserting like from card:", insertError);
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleLikeFromCard:", err);
+    }
+  };
+
   return (
     <>
       <Navbar
@@ -107,21 +207,42 @@ function App() {
         onCheckoutClick={handleCartClick}
       />
 
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/checkout" element={<CheckoutWrapper />} />
-        <Route
-          path="/login"
-          element={<Login onSignupRedirect={handleSignupRedirect} />}
-        />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/order-confirmation" element={<OrderConfirmation />} />
-        <Route path="/personal-details" element={<PersonalDetails />} />
-        <Route path="/likes" element={<LikesPage />}/>
-        <Route path="/orders" element={<OrdersPage />}/>
-        <Route path="/product/:productId" element={< ProductPage/>}/>
-      </Routes>
+      <main className="bg-black min-h-screen text-white pt-4">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Homepage
+                onAddToCart={handleAddToCart}
+                onLike={handleLikeFromCard}
+              />
+            }
+          />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/checkout"
+            element={
+              <CheckoutWrapper
+                cartItems={cartItems}
+                onRemoveFromCart={handleRemoveFromCart}
+              />
+            }
+          />
+          <Route
+            path="/login"
+            element={<Login onSignupRedirect={handleSignupRedirect} />}
+          />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/order-confirmation" element={<OrderConfirmation />} />
+          <Route path="/personal-details" element={<PersonalDetails />} />
+          <Route path="/likes" element={<LikesPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route
+            path="/product/:productId"
+            element={<ProductPage onAddToCart={handleAddToCart} />}
+          />
+        </Routes>
+      </main>
 
       {(showLoginModal || isClosing) && (
         <div
@@ -164,6 +285,7 @@ function App() {
               setShowCheckoutModal(false);
               navigate("/checkout");
             }}
+            onRemoveFromCart={handleRemoveFromCart}
           />
         </div>
       )}
