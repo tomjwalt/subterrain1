@@ -1,6 +1,9 @@
 # Clean Supabase Local Dev Config
 
-project_id = "subterrain1"
+# IMPORTANT:
+# For hosted deployments / CLI commands that target your Supabase project,
+# this should be your Supabase PROJECT REF (looks like: nyebwdvhkgiumqswbrfb)
+project_id = "nyebwdvhkgiumqswbrfb"
 
 [api]
 enabled = true
@@ -56,8 +59,16 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+
+# Use Vite’s default dev server port (you’re on 5173)
+site_url = "http://localhost:5173"
+additional_redirect_urls = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5173/*",
+  "http://127.0.0.1:5173/*"
+]
+
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
@@ -78,7 +89,11 @@ web3 = 30
 [auth.email]
 enable_signup = true
 double_confirm_changes = true
-enable_confirmations = false
+
+# IMPORTANT:
+# If you want verification emails, this MUST be true.
+enable_confirmations = true
+
 secure_password_change = false
 max_frequency = "1s"
 otp_length = 6
@@ -121,9 +136,13 @@ enabled = true
 port = 54327
 backend = "postgres"
 
-
 # ---------------------------------------
-# PUBLIC STRIPE PAYMENT FUNCTION
+# EDGE FUNCTIONS (PUBLIC)
+# Stripe will NOT send a Supabase JWT.
+# These must have verify_jwt = false.
 # ---------------------------------------
 [functions.create-payment-intent]
+verify_jwt = false
+
+[functions.stripe-webhook]
 verify_jwt = false

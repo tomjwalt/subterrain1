@@ -1,8 +1,5 @@
-// src/components/PersonalDetails.jsx
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const PersonalDetails = () => {
   const [authUser, setAuthUser] = useState(null);
@@ -14,11 +11,8 @@ const PersonalDetails = () => {
   const [success, setSuccess] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // still unused but keeping since you had it
 
-  // --- Load user + profile ---
   useEffect(() => {
     const loadProfile = async () => {
       setLoading(true);
@@ -41,8 +35,7 @@ const PersonalDetails = () => {
 
       const { data, error: profileError } = await supabase
         .from("profiles")
-        .select(
-          `
+        .select(`
           email,
           first_name,
           middle_name,
@@ -56,8 +49,7 @@ const PersonalDetails = () => {
           state,
           postal_code,
           country
-        `
-        )
+        `)
         .eq("id", user.id)
         .maybeSingle();
 
@@ -94,7 +86,6 @@ const PersonalDetails = () => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
-  // --- Save profile (with optional password re-entry) ---
   const handleSave = async (e) => {
     e.preventDefault();
     if (!authUser || !profile) return;
@@ -104,56 +95,43 @@ const PersonalDetails = () => {
     setSaving(true);
 
     try {
-      // Only require password if the user is an email/password account
-      if (authUser.app_metadata?.provider === "email") {
-        if (!currentPassword) {
-          setError("Please enter your current password to save changes.");
-          return;
-        }
-
-        const { error: pwError } = await supabase.auth.signInWithPassword({
-          email: authUser.email,
-          password: currentPassword,
-        });
-
-        if (pwError) {
-          console.error("Password check error:", pwError);
-          setError("Current password is incorrect.");
-          return;
-        }
-      }
-
-      // Upsert profile row (no onConflict needed, PK id is enough)
-      const { error: upsertError } = await supabase.from("profiles").upsert({
-        id: authUser.id,
-        email: profile.email,
-        first_name: profile.first_name,
-        middle_name: profile.middle_name,
-        last_name: profile.last_name,
-        dob: profile.dob,
-        gender: profile.gender,
-        phone_number: profile.phone_number,
-        house_number: profile.house_number,
-        street: profile.street,
-        city: profile.city,
-        state: profile.state,
-        postal_code: profile.postal_code,
-        country: profile.country,
-      });
+      const { error: upsertError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: authUser.id,
+            email: profile.email,
+            first_name: profile.first_name,
+            middle_name: profile.middle_name,
+            last_name: profile.last_name,
+            dob: profile.dob || null,
+            gender: profile.gender || null,
+            phone_number: profile.phone_number || null,
+            house_number: profile.house_number || null,
+            street: profile.street || null,
+            city: profile.city || null,
+            state: profile.state || null,
+            postal_code: profile.postal_code || null,
+            country: profile.country || null,
+          },
+          { onConflict: "id" }
+        );
 
       if (upsertError) {
         console.error("Profile save error:", upsertError);
         setError(upsertError.message || "Failed to save details. Please try again.");
-      } else {
-        setSuccess("Details updated successfully.");
-        setCurrentPassword("");
+        return;
       }
+
+      setSuccess("Details updated successfully.");
+    } catch (err) {
+      console.error("Unexpected profile save error:", err);
+      setError("Something went wrong while saving your details.");
     } finally {
       setSaving(false);
     }
   };
 
-  // --- Send password reset email ---
   const handleSendPasswordReset = async () => {
     if (!authUser?.email) return;
 
@@ -175,7 +153,6 @@ const PersonalDetails = () => {
     }
   };
 
-  // ---------- RENDER ----------
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white">
@@ -209,7 +186,6 @@ const PersonalDetails = () => {
           <p className="text-green-400 text-sm text-center mb-2">{success}</p>
         )}
 
-        {/* Basic details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
             className="input-field"
@@ -268,7 +244,6 @@ const PersonalDetails = () => {
           onChange={(e) => handleChange("phone_number", e.target.value)}
         />
 
-        {/* Address */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
             className="input-field"
@@ -294,9 +269,9 @@ const PersonalDetails = () => {
           <input
             className="input-field"
             type="text"
-            placeholder="County"
+            placeholder="County / State"
             value={profile.state}
-          onChange={(e) => handleChange("state", e.target.value)}
+            onChange={(e) => handleChange("state", e.target.value)}
           />
           <input
             className="input-field"
@@ -314,16 +289,17 @@ const PersonalDetails = () => {
           />
         </div>
 
-        {/* Password confirmation for updates */}
-        <div className="space-y-2 pt-2">
-          <label className="text-sm text-gray-300">
-            Confirm your password to save changes
-          </label>
-          <div className="relative">
+        <div className="mt-4 border-t border-gray-800 pt-4">
+          <h2 className="text-sm font-semibold mb-2">Change password</h2>
+          <p className="text-xs text-gray-400 mb-3">
+            We’ll email you a secure link to update your password.
+          </p>
+
+          <div className="relative mb-3">
             <input
               className="input-field pr-10"
               type={showPassword ? "text" : "password"}
-              placeholder="Current password"
+              placeholder="Current password (optional visual only)"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
             />
@@ -333,6 +309,14 @@ const PersonalDetails = () => {
               onClick={() => setShowPassword(!showPassword)}
             />
           </div>
+
+          <button
+            type="button"
+            onClick={handleSendPasswordReset}
+            className="btn-submit bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
+          >
+            Send password reset email
+          </button>
         </div>
 
         <button
@@ -344,21 +328,6 @@ const PersonalDetails = () => {
         >
           {saving ? "Saving…" : "Save changes"}
         </button>
-
-        {/* Change password via email */}
-        <div className="mt-4 border-t border-gray-800 pt-4">
-          <h2 className="text-sm font-semibold mb-2">Change password</h2>
-          <p className="text-xs text-gray-400 mb-2">
-            We’ll email you a secure link to update your password.
-          </p>
-          <button
-            type="button"
-            onClick={handleSendPasswordReset}
-            className="btn-submit bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
-          >
-            Send password reset email
-          </button>
-        </div>
       </form>
     </div>
   );

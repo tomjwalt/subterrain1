@@ -1,7 +1,7 @@
 export const products = [
   {
     id: "tee-1",
-    name: "SubTerrain Performance Tee",
+    name: "The Swag Man",
     category: "T-Shirts",
     price: 2499,
     badge: "Featured",

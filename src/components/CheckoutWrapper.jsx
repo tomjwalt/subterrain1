@@ -1,270 +1,235 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+// src/components/CheckoutWrapper.jsx
+import React, { useEffect, useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
-import { supabase } from "../../supabaseClient";
+import { loadStripe } from "@stripe/stripe-js";
+import { useNavigate } from "react-router-dom";
 import Checkout from "./Checkout";
+import { supabase } from "../../supabaseClient";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
 
+// ✅ hosted function base (prod)
+const FUNCTION_URL =
+  "https://nyebwdvhkgiumqswbrfb.functions.supabase.co/create-payment-intent";
+
 const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
-  const [stage, setStage] = useState("loading"); // 'loading' | 'email' | 'payment' | 'empty'
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [step, setStep] = useState("decide"); // decide | guest-email | checkout
+  const [errorMsg, setErrorMsg] = useState("");
+
   const [clientSecret, setClientSecret] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [creatingIntent, setCreatingIntent] = useState(false);
+  const [orderId, setOrderId] = useState(null);
+  const [loadingPI, setLoadingPI] = useState(false);
 
-  const hasItems = cartItems.length > 0;
+  // 1) Check auth
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUser(data.user);
+        setEmail(data.user.email || "");
+        setStep("checkout");
+      }
+      setAuthChecked(true);
+    };
+    checkUser();
+  }, []);
 
-  // prices are stored in pence (e.g. 2499)
-  const totalAmountPence = useMemo(
-    () =>
-      cartItems.reduce(
-        (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
-        0
-      ),
-    [cartItems]
+  // helper: subtotal in pence
+  const subtotalPence = cartItems.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+    0
   );
 
-  // 🔍 On mount: if we have items, check if user is logged in
-  useEffect(() => {
-    const init = async () => {
-      if (!hasItems) {
-        setStage("empty");
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) {
-          console.error("Error checking auth in checkout:", error);
-        }
-
-        const user = data?.user;
-        if (user?.email) {
-          // Logged in → use their email automatically
-          setUserEmail(user.email);
-          await createPaymentIntent(user.email);
-        } else {
-          // Not logged in → show guest email step
-          setStage("email");
-        }
-      } catch (err) {
-        console.error("Unexpected auth check error:", err);
-        setStage("email");
-      }
-    };
-
-    init();
-  }, [hasItems]); // runs once for this visit
-
-  const createPaymentIntent = async (email) => {
-    if (!totalAmountPence) {
-      setErrorMessage("Your basket is empty.");
-      setStage("empty");
-      return;
-    }
+  // 2) Create order row + PaymentIntent
+  const startHostedCheckout = async () => {
+    setErrorMsg("");
+    setLoadingPI(true);
 
     try {
-      setCreatingIntent(true);
-      setErrorMessage("");
+      const trimmedEmail = (email || "").trim();
+      if (!trimmedEmail) throw new Error("Missing email address.");
+      if (!subtotalPence) throw new Error("Your basket is empty.");
 
-      console.log("Creating PaymentIntent for:", totalAmountPence, "pence");
-      console.log("Line items:", cartItems);
+      // A) create order row first
+      const { data: order, error: orderErr } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user?.id ?? null,
+          email: trimmedEmail,
+          currency: "gbp",
+          total_amount: subtotalPence,
+          status: "pending_payment",
+          items: cartItems, // make sure your column type supports json
+        })
+        .select("id")
+        .single();
 
-      const { data, error } = await supabase.functions.invoke(
-        "create-payment-intent",
-        {
-          body: {
-            amount: totalAmountPence, // already in pence
-            currency: "gbp",
-            receipt_email: email,
-          },
-        }
-      );
+      if (orderErr) throw orderErr;
 
-      if (error) {
-        console.error("Supabase response (checkout) error:", error);
-        throw new Error(
-          error.message || "Failed to create payment session."
-        );
-      }
+      setOrderId(order.id);
 
-      console.log("Supabase response (checkout):", data);
+      // B) call hosted function with that orderId
+      const res = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: subtotalPence,
+          currency: "gbp",
+          email: trimmedEmail,
+          orderId: order.id,
+          userId: user?.id ?? null,
+        }),
+      });
 
-      const secret = data?.clientSecret || data?.client_secret;
-      if (!secret) {
-        throw new Error("No clientSecret returned from edge function.");
-      }
+      const json = await res.json().catch(() => ({}));
 
-      setClientSecret(secret);
-      setStage("payment");
-    } catch (err) {
-      console.error("Error creating payment intent:", err);
-      setErrorMessage(
-        err.message ||
-          "Something went wrong starting your payment. Please try again."
-      );
-      setStage("email"); // fall back to email step
+      if (!res.ok) throw new Error(json.error || "Failed to create payment intent");
+      if (!json.clientSecret) throw new Error("No clientSecret returned");
+
+      setClientSecret(json.clientSecret);
+    } catch (e) {
+      console.error(e);
+      setErrorMsg(e.message || "Checkout failed to start.");
     } finally {
-      setCreatingIntent(false);
+      setLoadingPI(false);
     }
   };
 
-  const handleGuestSubmit = async (e) => {
-    e.preventDefault();
-    if (!guestEmail) return;
-    await createPaymentIntent(guestEmail);
-  };
+  // auto-start for logged in users once we're on checkout step
+  useEffect(() => {
+    if (step !== "checkout") return;
+    if (!authChecked) return;
+    if (!email?.trim()) return;
+    if (clientSecret) return;
+    if (loadingPI) return;
 
-  const effectiveEmail = userEmail || guestEmail;
+    // only auto-start if user exists (optional)
+    if (user) startHostedCheckout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, authChecked, user, email]);
 
-  // ---------- RENDER STATES ----------
+  if (!authChecked) {
+    return <p className="text-white text-center mt-10">Loading checkout...</p>;
+  }
 
-  if (!hasItems || stage === "empty") {
+  // decide step (not logged in)
+  if (!user && step === "decide") {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 max-w-sm text-sm text-center">
-          <p className="mb-2">Your basket is empty.</p>
-          <p className="text-xs text-zinc-500">
-            Add something to your cart to start checkout.
-          </p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
+        <h1 className="text-3xl mb-6 font-semibold">Checkout</h1>
+
+        <div className="bg-[#121212] p-8 rounded-2xl shadow-lg w-[420px] space-y-5">
+          <p className="text-sm text-gray-300">Choose how you’d like to continue:</p>
+
+          <button
+            onClick={() => navigate("/login")}
+            className="w-full py-2 rounded-lg font-medium bg-white text-black hover:bg-gray-200 transition-all"
+          >
+            Sign in or create an account
+          </button>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-700" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-700" />
+          </div>
+
+          <button
+            onClick={() => setStep("guest-email")}
+            className="w-full py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 transition-all"
+          >
+            Continue as guest
+          </button>
         </div>
       </div>
     );
   }
 
-  if (stage === "loading") {
+  // guest email step
+  if (!user && step === "guest-email") {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-sm text-zinc-400">
-          Preparing your checkout…
-        </p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
+        <h1 className="text-3xl mb-6 font-semibold">Checkout</h1>
+
+        <div className="bg-[#121212] p-8 rounded-2xl shadow-lg w-[420px]">
+          <button
+            type="button"
+            onClick={() => {
+              setErrorMsg("");
+              setStep("decide");
+            }}
+            className="mb-4 text-sm text-gray-300 hover:text-white"
+          >
+            ← Back
+          </button>
+
+          <label className="block mb-2 text-sm font-medium">Email address (guest)</label>
+          <input
+            type="email"
+            className="w-full px-3 py-2 rounded-lg bg-[#1c1c1c] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          {errorMsg && <p className="mt-3 text-sm text-red-400 text-center">{errorMsg}</p>}
+
+          <button
+            onClick={() => {
+              if (!email.trim()) return setErrorMsg("Please enter an email address.");
+              setErrorMsg("");
+              setStep("checkout");
+              // guest flow: start checkout when they proceed
+              setTimeout(() => startHostedCheckout(), 0);
+            }}
+            className="mt-6 w-full py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 transition-all"
+          >
+            Continue to checkout
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Guest email step (for not-logged-in users)
-  if (stage === "email") {
+  // checkout step (needs clientSecret)
+  if (!clientSecret) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 w-full max-w-md">
-          <h1 className="text-2xl font-semibold text-center mb-4">
-            Checkout
-          </h1>
-          <p className="text-xs text-zinc-400 mb-4 text-center">
-            Enter your email to receive your receipt. You can continue
-            as a guest.
+        <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-sm text-center">
+          <p className="mb-3">
+            {loadingPI ? "Starting checkout…" : "Preparing payment…"}
           </p>
-
-          <form onSubmit={handleGuestSubmit} className="space-y-3 pb-6">
-            <div>
-              <label className="block text-[0.7rem] uppercase tracking-[0.25em] text-zinc-500 mb-1">
-                Email address
-              </label>
-              <input
-                type="email"
-                required
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-700 text-sm focus:outline-none focus:border-zinc-400"
-              />
-            </div>
-
-            {errorMessage && (
-              <p className="text-xs text-red-400">{errorMessage}</p>
-            )}
-
+          {errorMsg && <p className="text-red-400">{errorMsg}</p>}
+          {!loadingPI && (
             <button
-              type="submit"
-              disabled={creatingIntent}
-              className={`w-full py-2 rounded-lg text-xs font-medium uppercase tracking-[0.2em] ${
-                creatingIntent
-                  ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                  : "bg-white text-black hover:bg-zinc-200"
-              }`}
+              onClick={startHostedCheckout}
+              className="mt-4 w-full py-2 rounded-lg bg-zinc-900 border border-zinc-600 hover:bg-zinc-800 cursor-pointer"
             >
-              {creatingIntent ? "Starting checkout…" : "Continue as guest"}
+              Try again
             </button>
-          </form>
+          )}
         </div>
       </div>
     );
   }
 
-  // Payment stage – MUST be wrapped in <Elements>
-  if (stage === "payment" && clientSecret) {
-    const options = {
-  clientSecret,
-  appearance: {
-    theme: "night",
-    variables: {
-      colorText: "#ffffff",
-      colorTextSecondary: "#cfcfcf",
-      colorPrimary: "#ffffff",
-      colorBackground: "#000000",
-      colorDanger: "#ef4444",
-      borderRadius: "16px",
-      fontSizeBase: "16px",
-    },
-    rules: {
-      ".Label": {
-        color: "#e5e7eb",
-        fontWeight: "500",
-      },
-      ".Input": {
-        color: "#ffffff",
-        backgroundColor: "#111111",
-        border: "1px solid #3f3f46",
-      },
-      ".Input::placeholder": {
-        color: "#9ca3af",
-      },
-      ".Tab": {
-        backgroundColor: "#ffffff",
-        color: "#111111",
-      },
-      ".Tab--selected": {
-        backgroundColor: "#ffffff",
-        color: "#111111",
-      },
-      ".Block": {
-        backgroundColor: "#000000",
-      },
-    },
-  },
-};
-
-    return (
-      <Elements stripe={stripePromise} options={options}>
-        <Checkout
-          cartItems={cartItems}
-          onRemoveFromCart={onRemoveFromCart}
-          onBack={() => {
-            // Back to email step for guests; logged-in users can’t change email here.
-            if (userEmail) {
-              // If you want logged-in users to be able to change email too, just:
-              // setUserEmail("");
-              // and setStage("email");
-              window.history.back();
-            } else {
-              setClientSecret(null);
-              setStage("email");
-            }
-          }}
-          email={effectiveEmail}
-        />
-      </Elements>
-    );
-  }
-
-  // Fallback
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center">
-      <p className="text-sm text-red-400">
-        Something went wrong loading the payment form.
-      </p>
-    </div>
+    <Elements stripe={stripePromise} options={{ clientSecret }}>
+      <Checkout
+        email={email}
+        user={user}
+        cartItems={cartItems}
+        onRemoveFromCart={onRemoveFromCart}
+        orderId={orderId}
+        onBack={() => navigate("/")}
+      />
+    </Elements>
   );
 };
 

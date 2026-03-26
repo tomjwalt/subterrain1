@@ -1,6 +1,8 @@
 // supabase/functions/create-payment-intent/index.ts
+
 import Stripe from "https://esm.sh/stripe@12.17.0?target=deno";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,89 +11,76 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const getEnv = (key: string) => Deno.env.get(key) ?? "";
+
+function json(status: number, body: unknown) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
-  // --- Handle CORS preflight ---
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
 
   if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Only POST is allowed" }),
-      {
-        status: 405,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    return json(405, { error: "Only POST allowed" });
   }
 
   try {
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!STRIPE_SECRET_KEY) {
-      throw new Error("Missing STRIPE_SECRET_KEY in environment");
-    }
+    const STRIPE_SECRET_KEY = getEnv("STRIPE_SECRET_KEY");
+    if (!STRIPE_SECRET_KEY) return json(500, { error: "Missing STRIPE_SECRET_KEY" });
 
-    const stripe = new Stripe(STRIPE_SECRET_KEY, {
-      apiVersion: "2024-06-20",
-    });
+    // Support BOTH naming schemes
+    const SB_URL = getEnv("SB_URL") || getEnv("SUPABASE_URL");
+    const SB_SERVICE = getEnv("SB_SERVICE_ROLE_KEY") || getEnv("SUPABASE_SERVICE_ROLE_KEY");
+    if (!SB_URL || !SB_SERVICE) return json(500, { error: "Missing Supabase service envs" });
 
-    const body = await req.json().catch(() => null);
-    if (!body) {
-      throw new Error("Invalid JSON body");
-    }
+    const supabase = createClient(SB_URL, SB_SERVICE, { auth: { persistSession: false } });
+    const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2022-11-15" });
 
-    const { amount, currency, email, items } = body;
+    const body = await req.json().catch(() => ({}));
+    const { amount, currency = "gbp", email, orderId, userId } = body ?? {};
 
-    if (typeof amount !== "number" || amount <= 0) {
-      throw new Error("amount (number, in pence) is required");
-    }
+    if (!orderId) return json(400, { error: "Missing orderId" });
+
+    const amt = Number(amount);
+    if (!Number.isInteger(amt) || amt <= 0) return json(400, { error: "Invalid amount" });
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: currency || "gbp",
-      receipt_email: email || undefined,
-      automatic_payment_methods: { enabled: true },
+      amount: amt,
+      currency,
+      automatic_payment_methods: { enabled: true, allow_redirects: "never" },
+      receipt_email: email ?? undefined,
       metadata: {
-        ...(email ? { email } : {}),
-        ...(Array.isArray(items)
-          ? {
-              items: items
-                .map((i: any) =>
-                  `${i.id}:${i.quantity ?? 1}@${i.unit_price_pence ?? "?"}`,
-                )
-                .join("|"),
-            }
-          : {}),
+        orderId: String(orderId),
+        userId: userId ? String(userId) : "",
+        email: email ? String(email) : "",
       },
     });
 
-    return new Response(
-      JSON.stringify({ clientSecret: paymentIntent.client_secret }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    // ✅ Write PI id onto BOTH columns so the webhook can match reliably
+    const { error: updateErr } = await supabase
+      .from("orders")
+      .update({
+        payment_intent_id: paymentIntent.id,
+        stripe_payment_intent_id: paymentIntent.id,
+        status: "pending_payment",
+      })
+      .eq("id", orderId);
+
+    if (updateErr) {
+      console.error("❌ Failed to attach PI to order:", updateErr);
+      return json(500, { error: "Failed to update order with payment_intent_id" });
+    }
+
+    return json(200, {
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      orderId,
+    });
   } catch (err) {
-    console.error("Error in create-payment-intent:", err);
-    return new Response(
-      JSON.stringify({
-        error:
-          err instanceof Error ? err.message : "Unknown error creating payment intent",
-      }),
-      {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    console.error("❌ create-payment-intent error:", err);
+    return json(400, { error: err instanceof Error ? err.message : String(err) });
   }
 });

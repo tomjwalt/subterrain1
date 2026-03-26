@@ -77,7 +77,7 @@ const ProductCard = ({ product, onAddToCart, onLike }) => {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="inline-flex h-11 min-w-[148px] items-center justify-center gap-2 px-5 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold leading-none hover:border-white hover:text-white transition"
+            className="cursor-pointer inline-flex h-11 min-w-[148px] items-center justify-center gap-2 px-5 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold leading-none hover:border-white hover:text-white transition"
           >
             <FontAwesomeIcon icon={faCartShopping} className="text-xs" />
             <span>Add to cart</span>
@@ -86,7 +86,7 @@ const ProductCard = ({ product, onAddToCart, onLike }) => {
           <button
             type="button"
             onClick={handleLike}
-            className="inline-flex h-11 min-w-[148px] items-center justify-center gap-2 px-5 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold leading-none hover:border-white hover:text-white transition"
+            className="cursor-pointer inline-flex h-11 min-w-[148px] items-center justify-center gap-2 px-5 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold leading-none hover:border-white hover:text-white transition"
           >
             <FontAwesomeIcon icon={faThumbsUp} className="text-xs" />
             <span>Like</span>

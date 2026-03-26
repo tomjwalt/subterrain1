@@ -150,7 +150,7 @@ const LikesPage = () => {
                   }}
                   className="cursor-pointer self-end text-xs px-3 py-1 rounded-full border border-red-600 text-red-400 hover:bg-red-900/40 transition"
                 >
-                  Remove like
+                  Remove
                 </button>
               </div>
             ))}
