@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// src/components/ProductPage.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { products } from "../data/products";
 import { supabase } from "../../supabaseClient";
@@ -9,7 +10,10 @@ const ProductPage = ({ onAddToCart }) => {
   const { productId } = useParams();
   const navigate = useNavigate();
 
-  const product = products.find((p) => p.id === productId);
+  const product = useMemo(
+    () => products.find((p) => p.id === productId),
+    [productId],
+  );
 
   const [size, setSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
@@ -18,6 +22,15 @@ const ProductPage = ({ onAddToCart }) => {
   const [likeRowId, setLikeRowId] = useState(null);
   const [liking, setLiking] = useState(false);
   const [likeError, setLikeError] = useState("");
+
+  // ✅ Start blank, set after product exists
+  const [selectedColour, setSelectedColour] = useState("");
+
+  // ✅ When product loads/changes, set default colour
+  useEffect(() => {
+    if (!product) return;
+    setSelectedColour(product.colours?.[0] || "");
+  }, [product?.id]);
 
   useEffect(() => {
     const loadLikeState = async () => {
@@ -88,9 +101,10 @@ const ProductPage = ({ onAddToCart }) => {
   const handleAdd = () => {
     if (!onAddToCart) return;
 
+    // ✅ Use selectedColour, not a hardcoded string
     onAddToCart(product, {
       size,
-      colour: "Black / Reflective",
+      colour: selectedColour || product.colours?.[0] || "",
       quantity,
     });
   };
@@ -173,10 +187,13 @@ const ProductPage = ({ onAddToCart }) => {
     }
   };
 
+  // ✅ Robust price display
   const displayPrice =
-    typeof product.price === "number" && product.price > 100
-      ? (product.price / 100).toFixed(2)
-      : product.price.toFixed(2);
+    typeof product.price === "number"
+      ? product.price > 100
+        ? (product.price / 100).toFixed(2)
+        : product.price.toFixed(2)
+      : "0.00";
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -234,6 +251,31 @@ const ProductPage = ({ onAddToCart }) => {
                 ))}
               </div>
             </div>
+
+            {/* COLOUR */}
+            {product.colours?.length ? (
+              <div className="mt-1">
+                <p className="text-xs tracking-[0.35em] text-white/50 mb-2">
+                  COLOUR
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {product.colours.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setSelectedColour(c)}
+                      className={`px-4 py-1 rounded-full border text-sm transition ${
+                        selectedColour === c
+                          ? "border-white text-white"
+                          : "border-white/20 text-white/60 hover:border-white/60 hover:text-white"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             {/* QUANTITY */}
             <div>

@@ -14,6 +14,7 @@ export const products = [
     name: "Triathlon Pro",
     category: "T-Shirts",
     price: 3599,
+    colours: ["Black / Reflective", "Black", "Stone"],
     badge: "New",
     imageUrl: "/images/products/oversized-tee.jpg",
     description: "Heavyweight oversized tee with SubTerrain geometry detailing.",
