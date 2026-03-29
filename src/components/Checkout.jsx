@@ -1,3 +1,4 @@
+// src/components/Checkout.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   useStripe,
@@ -80,9 +81,7 @@ const CheckoutPaymentForm = ({
         <PaymentElement
           id="payment-element"
           options={{ layout: "tabs" }}
-          onReady={() => {
-            setPaymentReady(true);
-          }}
+          onReady={() => setPaymentReady(true)}
           onError={(err) => {
             console.error("PaymentElement error:", err);
             setMessage(
@@ -114,6 +113,8 @@ const CheckoutPaymentForm = ({
           {submitting ? "Processing..." : "Pay Now"}
         </button>
       </div>
+
+      {message ? <p className="text-sm text-red-400 text-center">{message}</p> : null}
     </form>
   );
 };
@@ -178,9 +179,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
           .eq("id", user.id)
           .maybeSingle();
 
-        if (error) {
-          console.error("Error loading profile address:", error);
-        }
+        if (error) console.error("Error loading profile address:", error);
 
         if (profile) {
           setDelivery((prev) => ({
@@ -207,10 +206,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
   }, [user]);
 
   const handleDeliveryChange = (field, value) => {
-    setDelivery((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setDelivery((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateDelivery = () => {
@@ -274,10 +270,12 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
         country: delivery.country,
       };
 
+      // ✅ IMPORTANT: include colour inside items so webhook/admin email can show it
       const itemsPayload = cartItems.map((item) => ({
         id: item.id,
         name: item.name,
         size: item.size ?? null,
+        colour: item.colour ?? "", // ✅ add colour here
         quantity: item.quantity || 1,
         price: item.price || 0,
       }));
@@ -318,7 +316,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok || !data.clientSecret) {
         console.error("Payment intent error:", data);
@@ -371,19 +369,13 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
 
         <div className="text-center">
           <h1 className="text-3xl font-semibold tracking-wide">Checkout</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Secure payment for your order
-          </p>
+          <p className="mt-1 text-sm text-zinc-500">Secure payment for your order</p>
         </div>
 
         <div className="flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-zinc-500">
-          <span className={step === "delivery" ? "text-white" : ""}>
-            Delivery
-          </span>
+          <span className={step === "delivery" ? "text-white" : ""}>Delivery</span>
           <span>•</span>
-          <span className={step === "payment" ? "text-white" : ""}>
-            Payment
-          </span>
+          <span className={step === "payment" ? "text-white" : ""}>Payment</span>
         </div>
 
         {/* Order summary */}
@@ -398,31 +390,33 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
               const lineTotalPence = (item.price || 0) * qty;
               const lineTotalDisplay = (lineTotalPence / 100).toFixed(2);
 
-              let sizeLabel = "Size";
-              if (typeof item.size === "string" && item.size.trim()) {
-                sizeLabel = `Size ${item.size}`;
-              } else if (item.size?.label) {
-                sizeLabel = `Size ${item.size.label}`;
-              }
+              const sizeText =
+                typeof item.size === "string" && item.size.trim()
+                  ? item.size
+                  : item.size?.label
+                  ? item.size.label
+                  : "";
+
+              const colourText =
+                typeof item.colour === "string" && item.colour.trim()
+                  ? item.colour
+                  : "";
 
               return (
                 <div
-                  key={item.id}
+                  key={`${item.id}-${sizeText}-${colourText}`}
                   className="flex items-start justify-between gap-4 border-b border-zinc-800 pb-3 last:border-b-0 last:pb-0"
                 >
                   <div className="min-w-0">
-                    <p className="font-medium text-base leading-tight">
-                      {item.name}
-                    </p>
+                    <p className="font-medium text-base leading-tight">{item.name}</p>
                     <p className="text-xs text-zinc-500 mt-1">
-                      {sizeLabel} · Qty {qty}
+                      {sizeText ? `Size ${sizeText}` : "Size"} ·{" "}
+                      {colourText ? `Colour ${colourText}` : "Colour"} · Qty {qty}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-medium">
-                      £{lineTotalDisplay}
-                    </span>
+                    <span className="text-sm font-medium">£{lineTotalDisplay}</span>
                     {onRemoveFromCart && (
                       <button
                         type="button"
@@ -464,18 +458,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     type="text"
                     placeholder="First name"
                     value={delivery.first_name}
-                    onChange={(e) =>
-                      handleDeliveryChange("first_name", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("first_name", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="Last name"
                     value={delivery.last_name}
-                    onChange={(e) =>
-                      handleDeliveryChange("last_name", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("last_name", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                 </div>
@@ -484,9 +474,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                   type="tel"
                   placeholder="Phone number"
                   value={delivery.phone_number}
-                  onChange={(e) =>
-                    handleDeliveryChange("phone_number", e.target.value)
-                  }
+                  onChange={(e) => handleDeliveryChange("phone_number", e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                 />
 
@@ -495,18 +483,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     type="text"
                     placeholder="House name / number"
                     value={delivery.house_number}
-                    onChange={(e) =>
-                      handleDeliveryChange("house_number", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("house_number", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="Street"
                     value={delivery.street}
-                    onChange={(e) =>
-                      handleDeliveryChange("street", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("street", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                 </div>
@@ -516,18 +500,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     type="text"
                     placeholder="City"
                     value={delivery.city}
-                    onChange={(e) =>
-                      handleDeliveryChange("city", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("city", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="County / State"
                     value={delivery.state}
-                    onChange={(e) =>
-                      handleDeliveryChange("state", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("state", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                 </div>
@@ -537,18 +517,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     type="text"
                     placeholder="Postcode"
                     value={delivery.postal_code}
-                    onChange={(e) =>
-                      handleDeliveryChange("postal_code", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("postal_code", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="Country"
                     value={delivery.country}
-                    onChange={(e) =>
-                      handleDeliveryChange("country", e.target.value)
-                    }
+                    onChange={(e) => handleDeliveryChange("country", e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                 </div>
@@ -572,11 +548,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
 
         {/* Payment step */}
         {step === "payment" && clientSecret && (
-          <Elements
-            key={clientSecret}
-            stripe={stripePromise}
-            options={{ clientSecret }}
-          >
+          <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret }}>
             <CheckoutPaymentForm
               email={email}
               clientSecret={clientSecret}
@@ -586,10 +558,6 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
               onBackToDelivery={() => setStep("delivery")}
             />
           </Elements>
-        )}
-
-        {message && (
-          <p className="text-sm text-red-400 text-center">{message}</p>
         )}
       </div>
     </div>

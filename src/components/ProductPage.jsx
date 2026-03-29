@@ -101,10 +101,9 @@ const ProductPage = ({ onAddToCart }) => {
   const handleAdd = () => {
     if (!onAddToCart) return;
 
-    // ✅ Use selectedColour, not a hardcoded string
     onAddToCart(product, {
       size,
-      colour: selectedColour || product.colours?.[0] || "",
+      colour: selectedColour,
       quantity,
     });
   };
