@@ -129,7 +129,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
 
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-2 rounded-lg font-medium bg-white text-black hover:bg-gray-200 transition-all"
+            className="w-full py-2 rounded-lg font-medium bg-white text-zinc-900 hover:bg-zinc-200 transition-all"
           >
             Sign in or create an account
           </button>
@@ -154,7 +154,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
   // guest email step
   if (!user && step === "guest-email") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-zinc-900">
         <h1 className="text-3xl mb-6 font-semibold">Checkout</h1>
 
         <div className="bg-[#121212] p-8 rounded-2xl shadow-lg w-[420px]">
@@ -164,7 +164,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
               setErrorMsg("");
               setStep("decide");
             }}
-            className="mb-4 text-sm text-gray-300 hover:text-white"
+            className="mb-4 text-sm text-zinc-900 hover:text-zinc-800"
           >
             ← Back
           </button>
@@ -172,7 +172,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
           <label className="block mb-2 text-sm font-medium">Email address (guest)</label>
           <input
             type="email"
-            className="w-full px-3 py-2 rounded-lg bg-[#1c1c1c] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 rounded-lg bg-[#1c1c1c] border border-gray-700 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
