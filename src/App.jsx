@@ -207,7 +207,7 @@ function App() {
         onCheckoutClick={handleCartClick}
       />
 
-      <main className="bg-black min-h-screen text-white pt-4">
+      <main className="bg-white min-h-screen pt-4 pb-16">
         <Routes>
           <Route
             path="/"

@@ -19,7 +19,7 @@ const SubNavbar = ({ isLoggedIn, onLogout }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="w-full bg-neutral-950 border-t border-neutral-800 text-gray-300 text-sm flex justify-center gap-10 py-3 shadow-md cursor-pointer"
+          className="w-full bg-white border-t border-neutral-800 text-gray-300 text-sm flex justify-center gap-10 py-3 shadow-md cursor-pointer"
         >
           <button className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer">
             <FontAwesomeIcon icon={faReceipt} />
