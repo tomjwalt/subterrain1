@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash, } from "@fortawesome/free-solid-svg-icons";
 
 const PersonalDetails = () => {
   const [authUser, setAuthUser] = useState(null);
@@ -170,10 +172,10 @@ const PersonalDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-start justify-center pt-24 px-4">
+    <div className="min-h-screen bg-white text-zinc-900 flex items-start justify-center pt-24 px-4">
       <form
         onSubmit={handleSave}
-        className="w-full max-w-xl bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800 space-y-4"
+        className="w-full max-w-xl bg-white rounded-2xl p-6 shadow-xl border border-gray-800 space-y-4"
       >
         <h1 className="text-2xl font-semibold mb-2 text-center">
           Personal Details
@@ -291,7 +293,7 @@ const PersonalDetails = () => {
 
         <div className="mt-4 border-t border-gray-800 pt-4">
           <h2 className="text-sm font-semibold mb-2">Change password</h2>
-          <p className="text-xs text-gray-400 mb-3">
+          <p className="text-xs text-zinc-900 mb-3">
             We’ll email you a secure link to update your password.
           </p>
 
@@ -305,7 +307,7 @@ const PersonalDetails = () => {
             />
             <FontAwesomeIcon
               icon={showPassword ? faEyeSlash : faEye}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white cursor-pointer transition-opacity duration-200"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-900 cursor-pointer transition-opacity duration-200"
               onClick={() => setShowPassword(!showPassword)}
             />
           </div>
@@ -313,7 +315,7 @@ const PersonalDetails = () => {
           <button
             type="button"
             onClick={handleSendPasswordReset}
-            className="btn-submit bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
+            className="btn-submit bg-white border border-zinc-900 rounded-xl p-1 hover:border-zinc-400 cursor-pointer"
           >
             Send password reset email
           </button>

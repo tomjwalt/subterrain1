@@ -24,7 +24,7 @@ const CheckoutModal = ({
   const total = subtotal + shippingCost;
 
   return (
-    <div className="w-80 bg-[#111] text-zinc-900 rounded-2xl shadow-lg border border-zinc-200 overflow-hidden">
+    <div className="w-80 bg-white text-zinc-900 rounded-2xl shadow-lg border border-zinc-200 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200">
         <h2 className="text-sm font-semibold">Your Basket</h2>
@@ -99,7 +99,7 @@ const CheckoutModal = ({
           onClick={onGoToCheckout}
           className={`w-full py-2 rounded-lg text-xs font-medium uppercase tracking-[0.18em] ${
             hasItems
-              ? "bg-white text-gray hover:bg-zinc-300"
+              ? "bg-white text-gray hover:bg-white"
               : "bg-white text-zinc-900 cursor-not-allowed"
           }`}
         >

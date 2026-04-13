@@ -121,28 +121,28 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
   // decide step (not logged in)
   if (!user && step === "decide") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-zinc-900">
         <h1 className="text-3xl mb-6 font-semibold">Checkout</h1>
 
-        <div className="bg-[#121212] p-8 rounded-2xl shadow-lg w-[420px] space-y-5">
-          <p className="text-sm text-gray-300">Choose how you’d like to continue:</p>
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-[420px] space-y-5">
+          <p className="text-sm text-zinc-900">Choose how you’d like to continue:</p>
 
           <button
             onClick={() => navigate("/login")}
-            className="w-full py-2 rounded-lg font-medium bg-white text-zinc-900 hover:bg-zinc-200 transition-all"
+            className="w-full py-2 rounded-lg font-medium bg-white text-zinc-900 hover:bg-white transition-all"
           >
             Sign in or create an account
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-700" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-700" />
+            <div className="flex-1 h-px bg-white" />
+            <span className="text-xs text-zinc-900">or</span>
+            <div className="flex-1 h-px bg-white" />
           </div>
 
           <button
             onClick={() => setStep("guest-email")}
-            className="w-full py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 transition-all"
+            className="w-full py-2 rounded-lg font-medium bg-white hover:bg-white transition-all"
           >
             Continue as guest
           </button>
@@ -154,10 +154,10 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
   // guest email step
   if (!user && step === "guest-email") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-zinc-900">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-zinc-900">
         <h1 className="text-3xl mb-6 font-semibold">Checkout</h1>
 
-        <div className="bg-[#121212] p-8 rounded-2xl shadow-lg w-[420px]">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-[420px]">
           <button
             type="button"
             onClick={() => {
@@ -172,7 +172,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
           <label className="block mb-2 text-sm font-medium">Email address (guest)</label>
           <input
             type="email"
-            className="w-full px-3 py-2 rounded-lg bg-[#1c1c1c] border border-gray-700 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 rounded-lg bg-white border border-gray-700 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -188,7 +188,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
               // guest flow: start checkout when they proceed
               setTimeout(() => startHostedCheckout(), 0);
             }}
-            className="mt-6 w-full py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 transition-all"
+            className="mt-6 w-full py-2 rounded-lg font-medium bg-white hover:bg-white transition-all"
           >
             Continue to checkout
           </button>
@@ -200,8 +200,8 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
   // checkout step (needs clientSecret)
   if (!clientSecret) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-        <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-sm text-center">
+      <div className="min-h-screen bg-white text-zinc-900 flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-white border border-zinc-800 rounded-2xl p-6 text-sm text-center">
           <p className="mb-3">
             {loadingPI ? "Starting checkout…" : "Preparing payment…"}
           </p>
@@ -209,7 +209,7 @@ const CheckoutWrapper = ({ cartItems = [], onRemoveFromCart }) => {
           {!loadingPI && (
             <button
               onClick={startHostedCheckout}
-              className="mt-4 w-full py-2 rounded-lg bg-zinc-900 border border-zinc-600 hover:bg-zinc-800 cursor-pointer"
+              className="mt-4 w-full py-2 rounded-lg bg-white border border-zinc-600 hover:border-zinc-300 cursor-pointer"
             >
               Try again
             </button>

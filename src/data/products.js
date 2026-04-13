@@ -1,9 +1,10 @@
 export const products = [
   {
     id: "tee-1",
-    name: "The Swag Man",
+    name: "Casual",
     category: "T-Shirts",
     price: 2499,
+    colours: ["Black / Reflective", "Black", "Stone"],
     badge: "Featured",
     imageUrl: "/images/products/performance-tee.jpg", // swap for real path
     description: "Lightweight, sweat-wicking performance tee built for brutal sessions.",

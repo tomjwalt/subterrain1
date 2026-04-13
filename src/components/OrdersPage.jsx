@@ -72,20 +72,20 @@ const OrdersPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center bg-white text-zinc-900">
         <p>Loading your orders…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center pt-24 px-4">
+    <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center pt-24 px-4">
       <div className="w-full max-w-3xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-semibold tracking-wide">Your Orders</h1>
           <button
             onClick={goToHomepage}
-            className="text-sm px-3 py-1 rounded-full border border-gray-600 hover:border-gray-300 hover:bg-gray-900 transition"
+            className="text-sm px-3 py-1 rounded-full border border-gray-900 hover:border-gray-400 transition"
           >
             Continue shopping
           </button>
@@ -106,7 +106,7 @@ const OrdersPage = () => {
             </p>
             <button
               onClick={goToHomepage}
-              className="px-4 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition"
+              className="px-4 py-2 rounded-lg bg-white text-zinc-900 font-medium hover:bg-gray-200 transition"
             >
               Shop now
             </button>
@@ -116,13 +116,13 @@ const OrdersPage = () => {
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="border border-gray-800 bg-[#101010] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="border border-gray-800 bg-white rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Order ID</p>
                   <p className="font-mono text-xs break-all">{order.id}</p>
 
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-zinc-900">
                     Placed on{" "}
                     {new Date(order.created_at).toLocaleString("en-GB", {
                       day: "2-digit",
@@ -135,7 +135,7 @@ const OrdersPage = () => {
                 </div>
 
                 <div className="text-right">
-                  <p className="text-sm text-gray-400 mb-1">Total</p>
+                  <p className="text-sm text-zinc-900 mb-1">Total</p>
                   <p className="text-lg font-semibold">
                     {formatMoney(order.total_amount, order.currency)}
                   </p>
@@ -143,10 +143,10 @@ const OrdersPage = () => {
                     <span
                       className={
                         order.status === "paid"
-                          ? "text-emerald-400"
+                          ? "text-zinc-900"
                           : order.status === "failed"
-                          ? "text-red-400"
-                          : "text-yellow-300"
+                          ? "text-zinc-900"
+                          : "text-zinc-900"
                       }
                     >
                       {order.status || "pending"}

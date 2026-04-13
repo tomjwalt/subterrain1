@@ -73,9 +73,9 @@ const CheckoutPaymentForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="border border-zinc-800 rounded-2xl p-4 md:p-5 bg-black/30 min-h-[220px]">
+      <div className="border border-zinc-800 rounded-2xl p-4 md:p-5 bg-white min-h-[220px]">
         {!paymentReady && (
-          <p className="text-xs text-zinc-500 mb-4">Loading payment fields…</p>
+          <p className="text-xs text-zinc-900 mb-4">Loading payment fields…</p>
         )}
 
         <PaymentElement
@@ -96,7 +96,7 @@ const CheckoutPaymentForm = ({
         <button
           type="button"
           onClick={onBackToDelivery}
-          className="flex-1 py-3 rounded-2xl font-semibold text-base border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 transition cursor-pointer"
+          className="flex-1 py-3 rounded-2xl font-semibold text-base border border-zinc-700 text-zinc-900 hover:text-white hover:border-zinc-500 transition cursor-pointer"
         >
           Back to delivery
         </button>
@@ -106,8 +106,8 @@ const CheckoutPaymentForm = ({
           disabled={submitting || !stripe || !elements}
           className={`flex-1 py-3 rounded-2xl font-semibold text-base transition ${
             submitting || !stripe || !elements
-              ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-              : "bg-zinc-900 text-white border border-zinc-500 hover:bg-zinc-800 cursor-pointer"
+              ? "bg-white text-zinc-900 cursor-not-allowed"
+              : "bg-white text-zinc-900 border border-zinc-500 hover:bg-zinc-800 cursor-pointer"
           }`}
         >
           {submitting ? "Processing..." : "Pay Now"}
@@ -337,14 +337,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
 
   if (!cartItems.length) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-        <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-sm text-center">
+      <div className="min-h-screen bg-white text-zinc-900 flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-white border border-zinc-800 rounded-2xl p-6 text-sm text-center">
           <p className="mb-3">Your basket is empty.</p>
           {onBack && (
             <button
               type="button"
               onClick={onBack}
-              className="text-xs text-zinc-400 hover:text-white cursor-pointer"
+              className="text-xs text-zinc-900 hover:text-zinc-300 cursor-pointer"
             >
               ← Go back
             </button>
@@ -355,13 +355,13 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
+    <div className="min-h-screen bg-white text-zinc-900 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-2xl bg-white border border-zinc-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
         {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="text-xs text-zinc-400 hover:text-white transition cursor-pointer"
+            className="text-xs text-zinc-900 hover:text-zinc-300 transition cursor-pointer"
           >
             ← Go Back
           </button>
@@ -369,18 +369,18 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
 
         <div className="text-center">
           <h1 className="text-3xl font-semibold tracking-wide">Checkout</h1>
-          <p className="mt-1 text-sm text-zinc-500">Secure payment for your order</p>
+          <p className="mt-1 text-sm text-zinc-900">Secure payment for your order</p>
         </div>
 
-        <div className="flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-zinc-500">
+        <div className="flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-zinc-900">
           <span className={step === "delivery" ? "text-white" : ""}>Delivery</span>
           <span>•</span>
           <span className={step === "payment" ? "text-white" : ""}>Payment</span>
         </div>
 
         {/* Order summary */}
-        <div className="border border-zinc-800 rounded-2xl p-4 md:p-5 bg-black/30">
-          <p className="text-[0.7rem] uppercase tracking-[0.28em] text-zinc-500 mb-4">
+        <div className="border border-zinc-800 rounded-2xl p-4 md:p-5 bg-white">
+          <p className="text-[0.7rem] uppercase tracking-[0.28em] text-zinc-900 mb-4">
             Order Summary
           </p>
 
@@ -409,7 +409,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                 >
                   <div className="min-w-0">
                     <p className="font-medium text-base leading-tight">{item.name}</p>
-                    <p className="text-xs text-zinc-500 mt-1">
+                    <p className="text-xs text-zinc-900 mt-1">
                       {sizeText ? `Size ${sizeText}` : "Size"} ·{" "}
                       {colourText ? `Colour ${colourText}` : "Colour"} · Qty {qty}
                     </p>
@@ -437,20 +437,20 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
             <span className="font-medium">Subtotal</span>
             <span className="font-medium">
               £{subtotalDisplay}{" "}
-              <span className="text-zinc-400 font-normal">(shipping free)</span>
+              <span className="text-zinc-900 font-normal">(shipping free)</span>
             </span>
           </div>
         </div>
 
         {/* Delivery step */}
         {step === "delivery" && (
-          <div className="border border-zinc-800 rounded-2xl p-4 md:p-5 bg-black/30 space-y-4">
-            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-zinc-500">
+          <div className="border border-zinc-800 rounded-2xl p-4 md:p-5 bg-white space-y-4">
+            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-zinc-900">
               Delivery Details
             </p>
 
             {loadingAddress ? (
-              <p className="text-sm text-zinc-500">Loading saved details…</p>
+              <p className="text-sm text-zinc-900">Loading saved details…</p>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -459,14 +459,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     placeholder="First name"
                     value={delivery.first_name}
                     onChange={(e) => handleDeliveryChange("first_name", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="Last name"
                     value={delivery.last_name}
                     onChange={(e) => handleDeliveryChange("last_name", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-white outline-none focus:border-zinc-500"
                   />
                 </div>
 
@@ -475,7 +475,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                   placeholder="Phone number"
                   value={delivery.phone_number}
                   onChange={(e) => handleDeliveryChange("phone_number", e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                  className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-white outline-none focus:border-zinc-500"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -484,14 +484,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     placeholder="House name / number"
                     value={delivery.house_number}
                     onChange={(e) => handleDeliveryChange("house_number", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="Street"
                     value={delivery.street}
                     onChange={(e) => handleDeliveryChange("street", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                 </div>
 
@@ -501,14 +501,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     placeholder="City"
                     value={delivery.city}
                     onChange={(e) => handleDeliveryChange("city", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="County / State"
                     value={delivery.state}
                     onChange={(e) => handleDeliveryChange("state", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                 </div>
 
@@ -518,14 +518,14 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     placeholder="Postcode"
                     value={delivery.postal_code}
                     onChange={(e) => handleDeliveryChange("postal_code", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                   <input
                     type="text"
                     placeholder="Country"
                     value={delivery.country}
                     onChange={(e) => handleDeliveryChange("country", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-900 text-white outline-none focus:border-zinc-500"
                   />
                 </div>
 
@@ -535,8 +535,8 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                   disabled={savingAddress}
                   className={`w-full py-3 rounded-2xl font-semibold text-base transition ${
                     savingAddress
-                      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                      : "bg-zinc-900 text-white border border-zinc-500 hover:bg-zinc-800 cursor-pointer"
+                      ? "bg-white text-zinc-900 cursor-not-allowed"
+                      : "bg-white text-zinc-900 border border-zinc-500 hover:bg-zinc-800 cursor-pointer"
                   }`}
                 >
                   {savingAddress ? "Saving details..." : "Continue to payment"}

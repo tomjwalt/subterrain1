@@ -79,20 +79,20 @@ const LikesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center bg-white text-zinc-900">
         <p>Loading your likes…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center pt-24 px-4">
+    <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center pt-24 px-4">
       <div className="w-full max-w-3xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-semibold tracking-wide">Your Likes</h1>
           <button
             onClick={goToHomepage}
-            className="text-sm px-3 py-1 rounded-full border border-gray-600 hover:border-gray-300 hover:bg-gray-900 transition"
+            className="text-sm px-3 py-1 rounded-full border border-gray-600 hover:border-gray-800 hover:border-gray-300 transition"
           >
             Browse products
           </button>
@@ -105,14 +105,14 @@ const LikesPage = () => {
         )}
 
         {likes.length === 0 ? (
-          <div className="border border-gray-800 rounded-2xl p-8 text-center bg-[#101010]">
+          <div className="border border-gray-800 rounded-2xl p-8 text-center bg-white">
             <p className="text-lg mb-2">You haven’t liked anything yet.</p>
             <p className="text-sm text-gray-400 mb-6">
               Tap the heart icon on a product to save it here.
             </p>
             <button
               onClick={goToHomepage}
-              className="px-4 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition"
+              className="px-4 py-2 rounded-lg bg-white text-black font-medium hover:border-gray-300 transition"
             >
               Discover products
             </button>
@@ -122,7 +122,7 @@ const LikesPage = () => {
             {likes.map((like) => (
               <div
                 key={like.id}
-                className="border border-gray-800 bg-[#101010] rounded-2xl p-4 flex flex-col gap-3 hover:border-gray-500 transition cursor-pointer"
+                className="border border-gray-800 bg-white rounded-2xl p-4 flex flex-col gap-3 hover:border-gray-300 transition cursor-pointer"
                 onClick={() => goToProduct(like.product_id)}
               >
                 <div className="flex-1">

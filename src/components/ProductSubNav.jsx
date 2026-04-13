@@ -14,13 +14,13 @@ const ProductSubNav = ({ activeTab, onChangeTab }) => {
           </p>
         </div>
 
-        <button
+        {/* <button
           type="button"
           onClick={() => onChangeTab("All")}
           className="text-[0.68rem] tracking-[0.28em] uppercase text-zinc-500 hover:text-zinc-900 transition"
         >
           View all
-        </button>
+        </button> */}
       </div>
 
       {/* Tabs */}

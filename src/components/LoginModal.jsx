@@ -157,19 +157,19 @@ const LoginModal = ({
     >
       <div
         ref={modalRef}
-        className="relative bg-gray-900 text-white rounded-xl p-6 w-80 shadow-lg border border-gray-800"
+        className="relative bg-white text-zinc-900 rounded-xl p-6 w-80 shadow-lg border border-gray-800"
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white"
+          className="absolute top-3 right-3 text-gray-400 hover:text-zinc-900"
         >
           <FontAwesomeIcon icon={faXmark} />
         </button>
 
         {/* While we check Supabase */}
         {checkingUser ? (
-          <p className="text-center text-gray-400 text-sm">Checking session…</p>
+          <p className="text-center text-zinc-900 text-sm">Checking session…</p>
         ) : user ? (
           // ---------- LOGGED-IN VIEW ----------
           <>
@@ -177,25 +177,25 @@ const LoginModal = ({
               My Account
             </h2>
             <p className="text-xs text-gray-400 text-center mb-4">
-              Signed in as <span className="text-white">{user.email}</span>
+              Signed in as <span className="text-zinc-900">{user.email}</span>
             </p>
 
             <div className="flex flex-col gap-2 mb-4 text-sm">
               <button
                 onClick={() => goTo(onGoToOrders)}
-                className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-md bg-white border border-gray-700 hover:border-gray-400 transition cursor-pointer"
               >
                 Orders
               </button>
               <button
                 onClick={() => goTo(onGoToLikes)}
-                className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-md bg-white border border-gray-700 hover:border-gray-400 transition cursor-pointer"
               >
                 Likes
               </button>
               <button
                 onClick={() => goTo(onGoToPersonalDetails)}
-                className="w-full text-left px-3 py-2 rounded-md bg-black border border-gray-700 hover:border-white transition cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-md bg-white border border-gray-700 hover:border-gray-400 transition cursor-pointer"
               >
                 Account Details
               </button>
@@ -203,7 +203,7 @@ const LoginModal = ({
 
             <button
               onClick={handleLogout}
-              className="w-full mt-2 border border-red-500 text-red-400 py-2 rounded-md bg-black hover:bg-red-600 hover:text-white transition cursor-pointer"
+              className="w-full mt-2 border border-red-500 text-red-400 py-2 rounded-md bg-white hover:bg-red-100 hover:text-zinc-900 transition cursor-pointer"
             >
               Log out
             </button>
@@ -219,7 +219,7 @@ const LoginModal = ({
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="p-2 rounded-md bg-black border border-gray-700 focus:border-white outline-none text-sm hover:border-white transition"
+                className="p-2 rounded-md bg-white border border-gray-700 focus:border-white outline-none text-sm hover:border-white transition"
                 required
               />
 
@@ -228,13 +228,13 @@ const LoginModal = ({
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="p-2 rounded-md bg-black border border-gray-700 focus:border-white outline-none text-sm hover:border-white transition"
+                className="p-2 rounded-md bg-white border border-gray-700 focus:border-white outline-none text-sm hover:border-white transition"
                 required
               />
 
               <p
                 onClick={handleForgotPassword}
-                className="text-sm text-gray-400 hover:text-white cursor-pointer text-right mt-1"
+                className="text-sm text-gray-400 hover:text-zinc-900 cursor-pointer text-right mt-1"
               >
                 Forgot password?
               </p>
@@ -246,7 +246,7 @@ const LoginModal = ({
               <button
                 type="submit"
                 disabled={loading}
-                className={`mt-2 border border-gray-700 text-white py-2 rounded-md bg-black transition hover:border-white ${
+                className={`mt-2 border border-gray-700 text-zinc-900 py-2 rounded-md bg-white transition hover:border-white ${
                   loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                 }`}
               >
@@ -317,7 +317,7 @@ const LoginModal = ({
                 New customer?{" "}
                 <button
                   onClick={onSignupRedirect}
-                  className="text-white underline hover:text-gray-300 cursor-pointer"
+                  className="text-zinc-900 underline hover:text-gray-300 cursor-pointer"
                 >
                   Sign Up
                 </button>

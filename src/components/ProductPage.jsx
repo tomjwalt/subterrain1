@@ -86,11 +86,11 @@ const ProductPage = ({ onAddToCart }) => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center justify-center">
         <p className="mb-4">Product not found.</p>
         <button
           onClick={() => navigate("/")}
-          className="px-4 py-2 rounded-full border border-zinc-700 text-sm hover:border-white"
+          className="px-4 py-2 rounded-full border border-gray-800 text-sm hover:border-gray-300"
         >
           Back to home
         </button>
@@ -195,12 +195,12 @@ const ProductPage = ({ onAddToCart }) => {
       : "0.00";
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-white text-zinc-900">
       <div className="w-full max-w-6xl mx-auto px-4 pt-10 pb-16">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start">
           {/* LEFT: IMAGE */}
-          <div className="border border-zinc-800 rounded-3xl h-80 md:h-[34rem] flex items-center justify-center bg-[#050507]">
-            <span className="text-xs tracking-[0.25em] uppercase text-zinc-600">
+          <div className="border border-zinc-800 rounded-3xl h-80 md:h-[34rem] flex items-center justify-center bg-white">
+            <span className="text-xs tracking-[0.25em] uppercase text-zinc-900">
               Product image
             </span>
           </div>
@@ -208,19 +208,19 @@ const ProductPage = ({ onAddToCart }) => {
           {/* RIGHT: DETAILS */}
           <div className="flex flex-col gap-7">
             <div className="space-y-3">
-              <p className="text-[0.72rem] tracking-[0.28em] uppercase text-zinc-400">
+              <p className="text-[0.72rem] tracking-[0.28em] uppercase text-zinc-900">
                 {product.category}
               </p>
 
-              <h1 className="text-3xl md:text-4xl font-semibold tracking-wide text-white leading-tight">
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-wide text-zinc-900 leading-tight">
                 {product.name}
               </h1>
 
-              <p className="text-base text-zinc-300 max-w-lg leading-7">
+              <p className="text-base text-zinc-900 max-w-lg leading-7">
                 {product.description}
               </p>
 
-              <p className="text-2xl font-semibold text-white">
+              <p className="text-2xl font-semibold text-zinc-900">
                 £{displayPrice}
               </p>
             </div>
@@ -228,7 +228,7 @@ const ProductPage = ({ onAddToCart }) => {
             {/* SIZE */}
             <div>
               <p
-                className="text-xs uppercase tracking-[0.24em] text-zinc-400"
+                className="text-xs uppercase tracking-[0.24em] text-zinc-900"
                 style={{ marginBottom: "5px" }}
               >
                 Size
@@ -241,8 +241,8 @@ const ProductPage = ({ onAddToCart }) => {
                     onClick={() => setSize(s)}
                     className={`min-w-[42px] px-3 py-2 rounded-full border text-sm transition ${
                       s === size
-                        ? "bg-white/10 text-white border-white font-semibold shadow-[0_0_0_1px_rgba(255,255,255,0.15)]"
-                        : "bg-transparent border-zinc-700 text-zinc-300 hover:border-zinc-400 hover:text-white"
+                        ? "bg-white text-zinc-900 border-gray-300 font-semibold shadow-[0_0_0_1px_rgba(255,255,255,0.15)]"
+                        : "bg-transparent border-gray-800 text-zinc-900 hover:border-gray-300"
                     }`}
                   >
                     {s}
@@ -254,7 +254,7 @@ const ProductPage = ({ onAddToCart }) => {
             {/* COLOUR */}
             {product.colours?.length ? (
               <div className="mt-1">
-                <p className="text-xs tracking-[0.35em] text-white/50 mb-2">
+                <p className="text-xs tracking-[0.35em] text-zinc-900 mb-2">
                   COLOUR
                 </p>
                 <div className="flex gap-2 flex-wrap">
@@ -263,10 +263,10 @@ const ProductPage = ({ onAddToCart }) => {
                       key={c}
                       type="button"
                       onClick={() => setSelectedColour(c)}
-                      className={`px-4 py-1 rounded-full border text-sm transition ${
+                      className={`px-4 py-1 rounded-full border text-sm transition cursor-pointer ${
                         selectedColour === c
-                          ? "border-white text-white"
-                          : "border-white/20 text-white/60 hover:border-white/60 hover:text-white"
+                          ? "border-gray-300 text-zinc-900"
+                          : "border-gray-800 text-zinc-900 hover:border-gray-300"
                       }`}
                     >
                       {c}
@@ -279,7 +279,7 @@ const ProductPage = ({ onAddToCart }) => {
             {/* QUANTITY */}
             <div>
               <p
-                className="text-xs uppercase tracking-[0.24em] text-zinc-400"
+                className="text-xs uppercase tracking-[0.24em] text-zinc-900"
                 style={{ marginBottom: "5px" }}
               >
                 Quantity
@@ -288,19 +288,19 @@ const ProductPage = ({ onAddToCart }) => {
               <div className="inline-flex items-center rounded-full border border-zinc-600 bg-transparent overflow-hidden px-3 py-1.5">
                 <button
                   type="button"
-                  className="w-5 flex items-center justify-center text-lg leading-none text-zinc-100 hover:text-white transition"
+                  className="w-5 flex items-center justify-center text-lg leading-none text-zinc-900 hover:text-zinc-300 transition"
                   onClick={() => setQuantity((q) => (q > 1 ? q - 1 : 1))}
                 >
                   −
                 </button>
 
-                <span className="mx-4 min-w-[14px] text-center text-sm font-semibold text-white leading-none">
+                <span className="mx-4 min-w-[14px] text-center text-sm font-semibold text-zinc-900 leading-none">
                   {quantity}
                 </span>
 
                 <button
                   type="button"
-                  className="w-5 flex items-center justify-center text-lg leading-none text-zinc-100 hover:text-white transition"
+                  className="w-5 flex items-center justify-center text-lg leading-none text-zinc-900 hover:text-zinc-300 transition"
                   onClick={() => setQuantity((q) => (q < 9 ? q + 1 : 9))}
                 >
                   +
@@ -313,7 +313,7 @@ const ProductPage = ({ onAddToCart }) => {
               <button
                 type="button"
                 onClick={handleAdd}
-                className="min-w-[126px] px-4 py-2 rounded-full border border-zinc-600 bg-transparent text-zinc-100 text-sm font-semibold hover:border-white hover:text-white transition"
+                className="min-w-[126px] px-4 py-2 rounded-full border border-gray-800 bg-transparent text-zinc-900 text-sm font-semibold hover:border-gray-300 transition"
               >
                 Add to cart
               </button>
@@ -324,8 +324,8 @@ const ProductPage = ({ onAddToCart }) => {
                 onClick={handleToggleLike}
                 className={`inline-flex items-center justify-center gap-2 min-w-[92px] px-4 py-2 rounded-full border text-sm font-semibold uppercase tracking-[0.04em] transition ${
                   liked
-                    ? "border-white text-white bg-zinc-800"
-                    : "border-zinc-600 bg-transparent text-zinc-100 hover:border-white hover:text-white"
+                    ? "border-gray-800 text-zinc-900 bg-white"
+                    : "border-gray-300 bg-transparent text-zinc-900 hover:border-gray-300"
                 }`}
               >
                 <FontAwesomeIcon icon={faThumbsUp} className="text-xs" />
@@ -338,18 +338,18 @@ const ProductPage = ({ onAddToCart }) => {
             )}
 
             {/* DESCRIPTION BLOCK */}
-            <div className="border border-zinc-800 rounded-2xl p-5 bg-zinc-950/60">
-              <p className="text-xs uppercase tracking-[0.24em] text-zinc-400 mb-3">
+            <div className="border border-gray-800 rounded-2xl p-5 bg-white">
+              <p className="text-xs uppercase tracking-[0.24em] text-zinc-900 mb-3">
                 Description
               </p>
 
-              <div className="space-y-3 text-sm text-zinc-300 leading-7">
+              <div className="space-y-3 text-sm text-zinc-900 leading-7">
                 <p>{product.description}</p>
                 <p>
                   Built for a clean, technical streetwear feel with a heavier
                   silhouette and a more structured drape.
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-zinc-400">
+                <ul className="list-disc pl-5 space-y-1 text-zinc-900">
                   <li>Oversized fit</li>
                   <li>Streetwear-inspired shape</li>
                   <li>Designed for everyday wear and layering</li>
