@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import artwork1 from "../assets/artwork1.png"
 
 const HeroBanner = () => {
   const navigate = useNavigate();
@@ -42,7 +43,8 @@ const HeroBanner = () => {
         {/* Right */}
         <div className="h-44 md:h-auto min-h-[180px] bg-zinc-100 border-t md:border-t-0 md:border-l border-zinc-200 flex items-center justify-center">
           <span className="text-[0.7rem] tracking-[0.28em] uppercase text-zinc-500">
-            Artwork / campaign image
+            
+            <img src={artwork1} />
           </span>
         </div>
       </div>

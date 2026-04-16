@@ -15,6 +15,7 @@ import PersonalDetails from "./components/PersonalDetails.jsx";
 import LikesPage from "./components/LikesPage.jsx";
 import OrdersPage from "./components/OrdersPage.jsx";
 import ProductPage from "./components/ProductPage.jsx";
+import CategoryPage from "./components/CategoryPage.jsx";
 
 import "./App.css";
 
@@ -240,6 +241,16 @@ function App() {
           <Route
             path="/product/:productId"
             element={<ProductPage onAddToCart={handleAddToCart} />}
+          />
+          {/* Category pages — /category/men, /category/women, etc. */}
+          <Route
+            path="/category/:gender"
+            element={
+              <CategoryPage
+                onAddToCart={handleAddToCart}
+                onLike={handleLikeFromCard}
+              />
+            }
           />
         </Routes>
       </main>

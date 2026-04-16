@@ -157,7 +157,7 @@ const PersonalDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center text-zinc-900">
         Loading profile…
       </div>
     );
@@ -165,7 +165,7 @@ const PersonalDetails = () => {
 
   if (!profile || !authUser) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center text-zinc-900">
         Unable to load profile.
       </div>
     );
