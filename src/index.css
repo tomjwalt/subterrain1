@@ -2,7 +2,7 @@
 
 /* Google Places Autocomplete container */
 .pac-container {
-  background-color: #1f2937 !important; /* Tailwind gray-800 */
+  background-color: white !important; /* Tailwind gray-800 */
   border: 1px solid #374151 !important; /* Tailwind gray-700 */
   border-radius: 0.75rem !important; /* rounded-xl */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* soft shadow */
@@ -14,13 +14,13 @@
 /* Prediction items */
 .pac-item {
   padding: 0.5rem 0.75rem !important; /* Tailwind p-2 px-3 */
-  color: #f9fafb !important; /* Tailwind gray-50 */
+  color: #18181b !important;
   font-size: 0.875rem !important; /* text-sm */
   cursor: pointer;
 }
 
 .pac-item-query {
-  color: #f9fafb !important; /* bright white */
+  color: #18181b !important;
   font-weight: 500; /* make it a little bolder */
 }
 
@@ -30,7 +30,7 @@
 
 .pac-item:hover,
 .pac-item-selected {
-  background-color: #374151 !important;
+  background-color: white !important;
   color: #ffffff !important;
 }
 
@@ -42,8 +42,8 @@
 /* Hover & selected styles */
 .pac-item:hover,
 .pac-item-selected {
-  background-color: #374151 !important; /* Tailwind gray-700 */
-  color: #f3f4f6 !important; /* Tailwind gray-100 */
+  background-color: white !important; /* Tailwind gray-700 */
+  color: #18181b !important; /* Tailwind gray-100 */
 }
 
 /* The little location icons */

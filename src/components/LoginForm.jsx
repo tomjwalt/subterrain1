@@ -69,7 +69,7 @@ const LoginForm = ({ onSignupRedirect }) => {
             <div>
                 <input
                     type="email"
-                    className="w-full p-2 rounded-lg mt-4 bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
+                    className="w-full p-2 rounded-lg mt-4 bg-white border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +80,7 @@ const LoginForm = ({ onSignupRedirect }) => {
             <div>
                 <input
                     type="password"
-                    className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500 mb-6"
+                    className="w-full p-2 rounded-lg bg-white border border-gray-700 hover:border-white focus:outline-none focus:border-gray-500 mb-6"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -90,7 +90,7 @@ const LoginForm = ({ onSignupRedirect }) => {
 
             <p
                 onClick={() => handleForgotPassword()}
-                className="text-sm text-gray-400 hover:text-white cursor-pointer text-right mt-1"
+                className="text-sm text-zinc-900 hover:text-white cursor-pointer text-right mt-1"
             >
                 Forgot password?
             </p>
@@ -98,7 +98,7 @@ const LoginForm = ({ onSignupRedirect }) => {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-gray-500 mt-10 cursor-pointer hover:border-white transition"
+                className="w-full p-2 rounded-lg bg-white border border-gray-700 focus:outline-none focus:border-gray-500 mt-10 cursor-pointer hover:border-white transition"
             >
                 {loading ? "Logging in..." : "Log In"}
             </button>

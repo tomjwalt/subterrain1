@@ -144,12 +144,12 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black px-4">
+    <div className="flex items-center justify-center min-h-screen bg-white px-4">
       <form
         onSubmit={handleSignUp}
-        className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-gray-900 p-6 shadow-md border border-gray-800"
+        className="flex flex-col gap-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-md border border-gray-800"
       >
-        <h1 className="text-white text-2xl font-semibold text-center mb-2">
+        <h1 className="text-zinc-900 text-2xl font-semibold text-center mb-2">
           Create account
         </h1>
 
@@ -194,7 +194,7 @@ const Signup = () => {
           />
           <FontAwesomeIcon
             icon={faCalendarDays}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-900 pointer-events-none"
           />
         </div>
 
@@ -219,7 +219,7 @@ const Signup = () => {
           />
           <FontAwesomeIcon
             icon={showPassword ? faEyeSlash : faEye}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white cursor-pointer transition-opacity duration-200"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-900 cursor-pointer transition-opacity duration-200"
             onClick={() => setShowPassword(!showPassword)}
           />
         </div>
@@ -234,12 +234,12 @@ const Signup = () => {
           />
           <FontAwesomeIcon
             icon={showConfirmPassword ? faEyeSlash : faEye}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white cursor-pointer transition-opacity duration-200"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-900 cursor-pointer transition-opacity duration-200"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           />
         </div>
 
-        <label className="text-white flex items-center gap-2 text-sm">
+        <label className="text-zinc-900 flex items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={agreeTerms}
@@ -248,7 +248,7 @@ const Signup = () => {
           I agree to the terms and conditions
         </label>
 
-        <label className="text-white flex items-center gap-2 text-sm">
+        <label className="text-zinc-900 flex items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={agreeMarketing}
@@ -276,7 +276,7 @@ const Signup = () => {
           <button
             type="button"
             onClick={resendVerification}
-            className="btn-submit bg-indigo-600 mt-2 hover:bg-indigo-700"
+            className="btn-submit bg-white mt-2 hover:bg-white"
           >
             Resend Verification Email
           </button>
@@ -291,9 +291,9 @@ const Signup = () => {
           width: 100%;
           padding: 0.75rem;
           border-radius: 0.5rem;
-          background-color: black;
+          background-color: white;
           border: 1px solid #374151;
-          color: white;
+          color: #18181b;
           outline: none;
           transition: all 0.2s;
         }
@@ -305,7 +305,7 @@ const Signup = () => {
           width: 100%;
           padding: 0.75rem;
           border-radius: 0.5rem;
-          background-color: black;
+          background-color: #18181b;
           border: 1px solid #374151;
           color: white;
           cursor: pointer;

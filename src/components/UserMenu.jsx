@@ -40,22 +40,22 @@ const UserMenu = ({ onLoginClick, isLoggedIn = true }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="absolute right-0 mt-4 w-48 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-lg overflow-hidden"
+            className="absolute right-0 mt-4 w-48 bg-white border border-neutral-700 rounded-2xl shadow-lg overflow-hidden"
           >
             <ul className="text-gray-300 text-sm">
-              <li className="flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 cursor-pointer">
+              <li className="flex items-center gap-2 px-4 py-3 hover:bg-white cursor-pointer">
                 <FontAwesomeIcon icon={faReceipt} className="text-gray-400" />
                 Orders
               </li>
-              <li className="flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 cursor-pointer">
+              <li className="flex items-center gap-2 px-4 py-3 hover:bg-white cursor-pointer">
                 <FontAwesomeIcon icon={faHeart} className="text-gray-400" />
                 Likes
               </li>
-              <li className="flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 cursor-pointer">
+              <li className="flex items-center gap-2 px-4 py-3 hover:bg-white cursor-pointer">
                 <FontAwesomeIcon icon={faLocationDot} className="text-gray-400" />
                 Addresses
               </li>
-              <li className="flex items-center gap-2 px-4 py-3 hover:bg-neutral-800 text-red-400 cursor-pointer border-t border-neutral-800">
+              <li className="flex items-center gap-2 px-4 py-3 hover:bg-white text-red-400 cursor-pointer border-t border-neutral-800">
                 <FontAwesomeIcon icon={faRightFromBracket} />
                 Logout
               </li>

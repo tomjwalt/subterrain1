@@ -62,12 +62,12 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-white p-4">
+    <div className="flex items-center justify-center min-h-screen bg-white text-zinc-900 p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative bg-gray-900 border border-gray-800 rounded-2xl p-8 w-96 shadow-lg text-center"
+        className="relative bg-white border-gray-800 rounded-2xl p-8 w-96 shadow-lg text-center"
       >
         <AnimatePresence mode="wait">
           {!success ? (
@@ -79,8 +79,8 @@ export default function ResetPassword() {
               transition={{ duration: 0.3 }}
             >
               <div className="flex justify-center mb-4">
-                <div className="bg-gray-800 p-3 rounded-full">
-                  <FontAwesomeIcon icon={faLock} className="text-white text-xl" />
+                <div className="bg-white p-3 rounded-full">
+                  <FontAwesomeIcon icon={faLock} className="text-zinc-900 text-xl" />
                 </div>
               </div>
 
@@ -104,7 +104,7 @@ export default function ResetPassword() {
                     placeholder="New password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 mb-3 rounded-md bg-black border border-gray-700 focus:border-white outline-none text-sm"
+                    className="w-full p-2 mb-3 rounded-md bg-white border border-gray-700 focus:border-white outline-none text-sm"
                   />
                   <input
                     type="password"
@@ -117,12 +117,12 @@ export default function ResetPassword() {
                             handleResetPassword();
                         }
                     }}
-                    className="w-full p-2 mb-4 rounded-md bg-black border border-gray-700 focus:border-white outline-none text-sm"
+                    className="w-full p-2 mb-4 rounded-md bg-white border border-gray-700 focus:border-white outline-none text-sm"
                   />
                   <button
                     onClick={handleResetPassword}
                     disabled={loading}
-                    className={`w-full py-2 rounded-md border border-gray-700 transition bg-black hover:border-white ${
+                    className={`w-full py-2 rounded-md border border-gray-700 transition bg-white hover:border-white ${
                       loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                     }`}
                   >
@@ -144,10 +144,10 @@ export default function ResetPassword() {
                 className="text-green-400 text-5xl mb-4"
               />
               <h2 className="text-xl font-semibold mb-2">Password Updated!</h2>
-              <p className="text-gray-400 text-sm mb-2">
+              <p className="text-zinc-900 text-sm mb-2">
                 You’ll be redirected to login shortly.
               </p>
-              <p className="text-gray-500 text-xs">Redirecting...</p>
+              <p className="text-zinc-900 text-xs">Redirecting...</p>
             </motion.div>
           )}
         </AnimatePresence>
