@@ -305,9 +305,9 @@ const Signup = () => {
           width: 100%;
           padding: 0.75rem;
           border-radius: 0.5rem;
-          background-color: #18181b;
+          background-color: white;
           border: 1px solid #374151;
-          color: white;
+          color: #18181b;
           cursor: pointer;
           transition: all 0.2s;
         }
