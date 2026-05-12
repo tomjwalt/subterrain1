@@ -31,7 +31,7 @@
 .pac-item:hover,
 .pac-item-selected {
   background-color: white !important;
-  color: #ffffff !important;
+  color: #18181b !important;
 }
 
 /* Divider line between items */

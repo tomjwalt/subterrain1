@@ -1,4 +1,3 @@
-// src/components/CheckoutModal.jsx
 import React, { useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -15,7 +14,7 @@ const CheckoutModal = ({
   const subtotal = useMemo(
     () =>
       cartItems.reduce(
-        (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+        (sum, item) => sum + ((item.price || 0) / 100) * (item.quantity || 1),
         0
       ),
     [cartItems]
@@ -51,12 +50,12 @@ const CheckoutModal = ({
                   <div>
                     <p className="font-medium text-xs">{item.name}</p>
                     {item.size && (
-                      <p className="text-[0.7rem] text-zinc-900">
-                        Size M · Qty {item.quantity || 1}
+                      <p className="text-[0.7rem] text-zinc-500">
+                        Size {item.size} · Qty {item.quantity || 1}
                       </p>
                     )}
                     <p className="text-[0.7rem] text-zinc-900">
-                      £{(item.price || 0).toFixed(2)}
+                      £{((item.price || 0) / 100).toFixed(2)}
                     </p>
                   </div>
 
@@ -76,12 +75,12 @@ const CheckoutModal = ({
             {/* Totals */}
             <div className="border-t border-zinc-200 pt-3 space-y-1 text-xs">
               <div className="flex justify-between">
-                <span className="text-zinc-900">Subtotal</span>
+                <span className="text-zinc-500">Subtotal</span>
                 <span>£{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-900">Shipping</span>
-                <span>{shippingCost === 0 ? "Free" : `£${shippingCost}`}</span>
+                <span className="text-zinc-500">Shipping</span>
+                <span>{shippingCost === 0 ? "Free" : `£${shippingCost.toFixed(2)}`}</span>
               </div>
               <div className="flex justify-between font-semibold pt-1">
                 <span>Total</span>
@@ -97,10 +96,10 @@ const CheckoutModal = ({
         <button
           disabled={!hasItems}
           onClick={onGoToCheckout}
-          className={`w-full py-2 rounded-lg text-xs font-medium uppercase tracking-[0.18em] ${
+          className={`w-full py-2 rounded-lg text-xs font-medium uppercase tracking-[0.18em] border transition ${
             hasItems
-              ? "bg-white text-gray hover:bg-white"
-              : "bg-white text-zinc-900 cursor-not-allowed"
+              ? "border-zinc-900 text-zinc-900 hover:bg-zinc-900 hover:text-white"
+              : "border-zinc-200 text-zinc-300 cursor-not-allowed"
           }`}
         >
           Go to checkout

@@ -466,7 +466,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     placeholder="Last name"
                     value={delivery.last_name}
                     onChange={(e) => handleDeliveryChange("last_name", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                 </div>
 
@@ -475,7 +475,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                   placeholder="Phone number"
                   value={delivery.phone_number}
                   onChange={(e) => handleDeliveryChange("phone_number", e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-white outline-none focus:border-zinc-500"
+                  className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-800 text-zinc-900 outline-none focus:border-zinc-500"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -525,7 +525,7 @@ const Checkout = ({ onBack, cartItems = [], onRemoveFromCart, email, user }) => 
                     placeholder="Country"
                     value={delivery.country}
                     onChange={(e) => handleDeliveryChange("country", e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-900 text-white outline-none focus:border-zinc-500"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-900 text-zinc-900 outline-none focus:border-zinc-500"
                   />
                 </div>
 

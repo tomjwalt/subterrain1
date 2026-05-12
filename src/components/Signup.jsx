@@ -260,7 +260,7 @@ const Signup = () => {
         <ReCAPTCHA
           sitekey="6Lcslu8rAAAAAMLjcMQ6ZZut5wODSgoxAK_zHy1S"
           onChange={(token) => setCaptchaToken(token)}
-          theme="dark"
+          theme="light"
           style={{ transform: "scale(0.85)", transformOrigin: "0 0" }}
         />
 

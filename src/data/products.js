@@ -1,3 +1,5 @@
+import Artboard4 from "../assets/Artboard-4.jpg"
+
 export const products = [
   {
     id: "tee-1",
@@ -18,7 +20,7 @@ export const products = [
     price: 3599,
     colours: ["Black / Reflective", "Black", "Stone"],
     badge: "New",
-    imageUrl: "/images/products/oversized-tee.jpg",
+    imageUrl: Artboard4,
     description: "Heavyweight oversized tee with SubTerrain geometry detailing.",
     featured: true,
     gender: ["men", "women"],
